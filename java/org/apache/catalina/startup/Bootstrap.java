@@ -188,13 +188,13 @@ public final class Bootstrap {
     /**
      * Initialize daemon.
      */
-    public void init()
-            throws Exception {
+    public void init() throws Exception {
 
         // Set Catalina path
         setCatalinaHome();
         setCatalinaBase();
 
+        //初始化类加载器
         initClassLoaders();
 
         Thread.currentThread().setContextClassLoader(catalinaLoader);
@@ -204,21 +204,23 @@ public final class Bootstrap {
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
-        Class<?> startupClass =
-                catalinaLoader.loadClass
-                        ("org.apache.catalina.startup.Catalina");
+        //通过反射实例化Catalina对象
+        Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
         Object startupInstance = startupClass.newInstance();
 
         // Set the shared extensions class loader
         if (log.isDebugEnabled())
             log.debug("Setting startup class properties");
+
+        /**
+         * 反射调用Catalina对象的setParentClassLoader方法设置父类加载器为sharedLoader
+         */
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Class.forName("java.lang.ClassLoader");
         Object paramValues[] = new Object[1];
         paramValues[0] = sharedLoader;
-        Method method =
-                startupInstance.getClass().getMethod(methodName, paramTypes);
+        Method method = startupInstance.getClass().getMethod(methodName, paramTypes);
         method.invoke(startupInstance, paramValues);
 
         catalinaDaemon = startupInstance;
@@ -245,8 +247,11 @@ public final class Bootstrap {
             param = new Object[1];
             param[0] = arguments;
         }
-        Method method =
-                catalinaDaemon.getClass().getMethod(methodName, paramTypes);
+        /**
+         * catalinaDaemon是的Catalina实例化对象
+         * 反射调用Catalina的load方法
+         */
+        Method method = catalinaDaemon.getClass().getMethod(methodName, paramTypes);
         if (log.isDebugEnabled())
             log.debug("Calling startup class " + method);
         method.invoke(catalinaDaemon, param);
@@ -415,7 +420,9 @@ public final class Bootstrap {
 
             if (command.equals("startd")) {
                 args[args.length - 1] = "start";
+                //调用load方法
                 daemon.load(args);
+                //调用start方法
                 daemon.start();
             } else if (command.equals("stopd")) {
                 args[args.length - 1] = "stop";
@@ -469,39 +476,31 @@ public final class Bootstrap {
         if (System.getProperty(Globals.CATALINA_BASE_PROP) != null)
             return;
         if (System.getProperty(Globals.CATALINA_HOME_PROP) != null)
-            System.setProperty(Globals.CATALINA_BASE_PROP,
-                    System.getProperty(Globals.CATALINA_HOME_PROP));
+            System.setProperty(Globals.CATALINA_BASE_PROP, System.getProperty(Globals.CATALINA_HOME_PROP));
         else
-            System.setProperty(Globals.CATALINA_BASE_PROP,
-                    System.getProperty("user.dir"));
-
+            System.setProperty(Globals.CATALINA_BASE_PROP, System.getProperty("user.dir"));
     }
 
 
     /**
      * Set the <code>catalina.home</code> System property to the current
      * working directory if it has not been set.
+     * 设置系统变量
      */
     private void setCatalinaHome() {
 
         if (System.getProperty(Globals.CATALINA_HOME_PROP) != null)
             return;
-        File bootstrapJar =
-                new File(System.getProperty("user.dir"), "bootstrap.jar");
+        File bootstrapJar = new File(System.getProperty("user.dir"), "bootstrap.jar");
         if (bootstrapJar.exists()) {
             try {
-                System.setProperty
-                        (Globals.CATALINA_HOME_PROP,
-                                (new File(System.getProperty("user.dir"), ".."))
-                                        .getCanonicalPath());
+                System.setProperty(Globals.CATALINA_HOME_PROP, (new File(System.getProperty("user.dir"), "..")).getCanonicalPath());
             } catch (Exception e) {
                 // Ignore
-                System.setProperty(Globals.CATALINA_HOME_PROP,
-                        System.getProperty("user.dir"));
+                System.setProperty(Globals.CATALINA_HOME_PROP, System.getProperty("user.dir"));
             }
         } else {
-            System.setProperty(Globals.CATALINA_HOME_PROP,
-                    System.getProperty("user.dir"));
+            System.setProperty(Globals.CATALINA_HOME_PROP, System.getProperty("user.dir"));
         }
 
     }

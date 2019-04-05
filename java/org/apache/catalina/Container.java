@@ -19,16 +19,15 @@
 package org.apache.catalina;
 
 
-import java.beans.PropertyChangeListener;
-import java.io.IOException;
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.Response;
+import org.apache.juli.logging.Log;
 
 import javax.management.ObjectName;
 import javax.naming.directory.DirContext;
 import javax.servlet.ServletException;
-
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.juli.logging.Log;
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 
 /**
@@ -42,15 +41,15 @@ import org.apache.juli.logging.Log;
  * following examples represent common cases:
  * <ul>
  * <li><b>Engine</b> - Representation of the entire Catalina servlet engine,
- *     most likely containing one or more subcontainers that are either Host
- *     or Context implementations, or other custom groups.
+ * most likely containing one or more subcontainers that are either Host
+ * or Context implementations, or other custom groups.
  * <li><b>Host</b> - Representation of a virtual host containing a number
- *     of Contexts.
+ * of Contexts.
  * <li><b>Context</b> - Representation of a single ServletContext, which will
- *     typically contain one or more Wrappers for the supported servlets.
+ * typically contain one or more Wrappers for the supported servlets.
  * <li><b>Wrapper</b> - Representation of an individual servlet definition
- *     (which may support multiple servlet instances if the servlet itself
- *     implements SingleThreadModel).
+ * (which may support multiple servlet instances if the servlet itself
+ * implements SingleThreadModel).
  * </ul>
  * A given deployment of Catalina need not include Containers at all of the
  * levels described above.  For example, an administration application
@@ -66,16 +65,16 @@ import org.apache.juli.logging.Log;
  * components are currently recognized:
  * <ul>
  * <li><b>Loader</b> - Class loader to use for integrating new Java classes
- *     for this Container into the JVM in which Catalina is running.
+ * for this Container into the JVM in which Catalina is running.
  * <li><b>Logger</b> - Implementation of the <code>log()</code> method
- *     signatures of the <code>ServletContext</code> interface.
+ * signatures of the <code>ServletContext</code> interface.
  * <li><b>Manager</b> - Manager for the pool of Sessions associated with
- *     this Container.
+ * this Container.
  * <li><b>Realm</b> - Read-only interface to a security domain, for
- *     authenticating user identities and their corresponding roles.
+ * authenticating user identities and their corresponding roles.
  * <li><b>Resources</b> - JNDI directory context enabling access to static
- *     resources, enabling custom linkages to existing server components when
- *     Catalina is embedded in a larger server.
+ * resources, enabling custom linkages to existing server components when
+ * Catalina is embedded in a larger server.
  * </ul>
  *
  * @author Craig R. McClanahan
@@ -98,6 +97,7 @@ public interface Container extends Lifecycle {
     /**
      * The ContainerEvent event type sent when a Mapper is added
      * by <code>addMapper()</code>.
+     *
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
@@ -121,6 +121,7 @@ public interface Container extends Lifecycle {
     /**
      * The ContainerEvent event type sent when a Mapper is removed
      * by <code>removeMapper()</code>.
+     *
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
@@ -256,10 +257,9 @@ public interface Container extends Lifecycle {
      * parent, Container names must be unique.
      *
      * @param name New name of this container
-     *
-     * @exception IllegalStateException if this Container has already been
-     *  added to the children of a parent Container (after which the name
-     *  may not be changed)
+     * @throws IllegalStateException if this Container has already been
+     *                               added to the children of a parent Container (after which the name
+     *                               may not be changed)
      */
     public void setName(String name);
 
@@ -277,10 +277,9 @@ public interface Container extends Lifecycle {
      * Container by throwing an exception.
      *
      * @param container Container to which this Container is being added
-     *  as a child
-     *
-     * @exception IllegalArgumentException if this Container refuses to become
-     *  attached to the specified Container
+     *                  as a child
+     * @throws IllegalArgumentException if this Container refuses to become
+     *                                  attached to the specified Container
      */
     public void setParent(Container container);
 
@@ -356,13 +355,12 @@ public interface Container extends Lifecycle {
      * to be attached to the specified Container, in which case it is not added
      *
      * @param child New child Container to be added
-     *
-     * @exception IllegalArgumentException if this exception is thrown by
-     *  the <code>setParent()</code> method of the child Container
-     * @exception IllegalArgumentException if the new child does not have
-     *  a name unique from that of existing children of this Container
-     * @exception IllegalStateException if this Container does not support
-     *  child Containers
+     * @throws IllegalArgumentException if this exception is thrown by
+     *                                  the <code>setParent()</code> method of the child Container
+     * @throws IllegalArgumentException if the new child does not have
+     *                                  a name unique from that of existing children of this Container
+     * @throws IllegalStateException    if this Container does not support
+     *                                  child Containers
      */
     public void addChild(Container child);
 
@@ -411,19 +409,17 @@ public interface Container extends Lifecycle {
      * Process the specified Request, and generate the corresponding Response,
      * according to the design of this particular Container.
      *
-     * @param request Request to be processed
+     * @param request  Request to be processed
      * @param response Response to be produced
-     *
-     * @exception IOException if an input/output error occurred while
-     *  processing
-     * @exception ServletException if a ServletException was thrown
-     *  while processing this request
-     *
+     * @throws IOException      if an input/output error occurred while
+     *                          processing
+     * @throws ServletException if a ServletException was thrown
+     *                          while processing this request
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public void invoke(Request request, Response response)
-        throws IOException, ServletException;
+            throws IOException, ServletException;
 
 
     /**
@@ -466,15 +462,16 @@ public interface Container extends Lifecycle {
      * Log a request/response that was destined for this container but has been
      * handled earlier in the processing chain so that the request/response
      * still appears in the correct access logs.
-     * @param request       Request (associated with the response) to log
-     * @param response      Response (associated with the request) to log
-     * @param time          Time taken to process the request/response in
-     *                      milliseconds (use 0 if not known)
-     * @param   useDefault  Flag that indicates that the request/response should
-     *                      be logged in the engine's default access log
+     *
+     * @param request    Request (associated with the response) to log
+     * @param response   Response (associated with the request) to log
+     * @param time       Time taken to process the request/response in
+     *                   milliseconds (use 0 if not known)
+     * @param useDefault Flag that indicates that the request/response should
+     *                   be logged in the engine's default access log
      */
     public void logAccess(Request request, Response response, long time,
-            boolean useDefault);
+                          boolean useDefault);
 
 
     /**
@@ -497,7 +494,8 @@ public interface Container extends Lifecycle {
      * Sets the number of threads available for starting and stopping any
      * children associated with this container. This allows start/stop calls to
      * children to be processed in parallel.
-     * @param   startStopThreads    The new number of threads to be used
+     *
+     * @param startStopThreads The new number of threads to be used
      */
     public void setStartStopThreads(int startStopThreads);
 }
