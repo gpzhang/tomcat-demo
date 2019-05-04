@@ -32,12 +32,12 @@ import org.xml.sax.Attributes;
  * implementation class to be used is determined by:
  * <ol>
  * <li>Does the top element on the stack specify an implementation class using
- *     the attribute specified when this rule was created?</li>
+ * the attribute specified when this rule was created?</li>
  * <li>Does the parent {@link Container} of the {@link Container} on the top of
- *     the stack specify an implementation class using the attribute specified
- *     when this rule was created?</li>
+ * the stack specify an implementation class using the attribute specified
+ * when this rule was created?</li>
  * <li>Use the default implementation class specified when this rule was
- *     created.</li>
+ * created.</li>
  * </ol>
  */
 public class LifecycleListenerRule extends Rule {
@@ -50,9 +50,9 @@ public class LifecycleListenerRule extends Rule {
      * Construct a new instance of this Rule.
      *
      * @param listenerClass Default name of the LifecycleListener
-     *  implementation class to be created
+     *                      implementation class to be created
      * @param attributeName Name of the attribute that optionally
-     *  includes an override name of the LifecycleListener class
+     *                      includes an override name of the LifecycleListener class
      */
     public LifecycleListenerRule(String listenerClass, String attributeName) {
 
@@ -85,12 +85,11 @@ public class LifecycleListenerRule extends Rule {
      * Handle the beginning of an XML element.
      *
      * @param attributes The attributes of this element
-     *
-     * @exception Exception if a processing error occurs
+     * @throws Exception if a processing error occurs
      */
     @Override
     public void begin(String namespace, String name, Attributes attributes)
-        throws Exception {
+            throws Exception {
 
         Container c = (Container) digester.peek();
         Container p = null;
@@ -100,7 +99,7 @@ public class LifecycleListenerRule extends Rule {
         }
 
         String className = null;
-        
+
         // Check the container for the specified attribute
         if (attributeName != null) {
             String value = attributes.getValue(attributeName);
@@ -110,22 +109,20 @@ public class LifecycleListenerRule extends Rule {
 
         // Check the container's parent for the specified attribute
         if (p != null && className == null) {
-            String configClass =
-                (String) IntrospectionUtils.getProperty(p, attributeName);
+            String configClass = (String) IntrospectionUtils.getProperty(p, attributeName);
             if (configClass != null && configClass.length() > 0) {
                 className = configClass;
             }
         }
-        
+
         // Use the default
         if (className == null) {
             className = listenerClass;
         }
-        
+
         // Instantiate a new LifecycleListener implementation object
         Class<?> clazz = Class.forName(className);
-        LifecycleListener listener =
-            (LifecycleListener) clazz.newInstance();
+        LifecycleListener listener = (LifecycleListener) clazz.newInstance();
 
         // Add this LifecycleListener to our associated component
         c.addLifecycleListener(listener);

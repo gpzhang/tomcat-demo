@@ -66,8 +66,7 @@ import java.util.jar.JarFile;
  * @author Remy Maucherat
  */
 
-public class WebappLoader extends LifecycleMBeanBase
-        implements Loader, PropertyChangeListener {
+public class WebappLoader extends LifecycleMBeanBase implements Loader, PropertyChangeListener {
 
     // ----------------------------------------------------------- Constructors
 
@@ -139,8 +138,7 @@ public class WebappLoader extends LifecycleMBeanBase
      * This class should extend WebappClassLoaderBase, otherwise, a different
      * loader implementation must be used.
      */
-    private String loaderClass =
-            "org.apache.catalina.loader.WebappClassLoader";
+    private String loaderClass = "org.apache.catalina.loader.WebappClassLoader";
 
 
     /**
@@ -562,8 +560,7 @@ public class WebappLoader extends LifecycleMBeanBase
         }
 
         // Register a stream handler factory for the JNDI protocol
-        URLStreamHandlerFactory streamHandlerFactory =
-                DirContextURLStreamHandlerFactory.getInstance();
+        URLStreamHandlerFactory streamHandlerFactory = DirContextURLStreamHandlerFactory.getInstance();
         if (first) {
             first = false;
             try {
@@ -588,22 +585,14 @@ public class WebappLoader extends LifecycleMBeanBase
             classLoader.setDelegate(this.delegate);
             classLoader.setSearchExternalFirst(searchExternalFirst);
             if (container instanceof StandardContext) {
-                classLoader.setAntiJARLocking(
-                        ((StandardContext) container).getAntiJARLocking());
-                classLoader.setClearReferencesRmiTargets(
-                        ((StandardContext) container).getClearReferencesRmiTargets());
-                classLoader.setClearReferencesStatic(
-                        ((StandardContext) container).getClearReferencesStatic());
-                classLoader.setClearReferencesStopThreads(
-                        ((StandardContext) container).getClearReferencesStopThreads());
-                classLoader.setClearReferencesStopTimerThreads(
-                        ((StandardContext) container).getClearReferencesStopTimerThreads());
-                classLoader.setClearReferencesHttpClientKeepAliveThread(
-                        ((StandardContext) container).getClearReferencesHttpClientKeepAliveThread());
-                classLoader.setClearReferencesObjectStreamClassCaches(
-                        ((StandardContext) container).getClearReferencesObjectStreamClassCaches());
-                classLoader.setClearReferencesThreadLocals(
-                        ((StandardContext) container).getClearReferencesThreadLocals());
+                classLoader.setAntiJARLocking(((StandardContext) container).getAntiJARLocking());
+                classLoader.setClearReferencesRmiTargets(((StandardContext) container).getClearReferencesRmiTargets());
+                classLoader.setClearReferencesStatic(((StandardContext) container).getClearReferencesStatic());
+                classLoader.setClearReferencesStopThreads(((StandardContext) container).getClearReferencesStopThreads());
+                classLoader.setClearReferencesStopTimerThreads(((StandardContext) container).getClearReferencesStopTimerThreads());
+                classLoader.setClearReferencesHttpClientKeepAliveThread(((StandardContext) container).getClearReferencesHttpClientKeepAliveThread());
+                classLoader.setClearReferencesObjectStreamClassCaches(((StandardContext) container).getClearReferencesObjectStreamClassCaches());
+                classLoader.setClearReferencesThreadLocals(((StandardContext) container).getClearReferencesThreadLocals());
             }
 
             for (int i = 0; i < repositories.length; i++) {
@@ -619,8 +608,7 @@ public class WebappLoader extends LifecycleMBeanBase
             ((Lifecycle) classLoader).start();
 
             // Binding the Webapp class loader to the directory context
-            DirContextURLStreamHandler.bind(classLoader,
-                    this.container.getResources());
+            DirContextURLStreamHandler.bind(classLoader, this.container.getResources());
 
             StandardContext ctx = (StandardContext) container;
             String contextName = ctx.getName();
@@ -724,6 +712,8 @@ public class WebappLoader extends LifecycleMBeanBase
 
     /**
      * Create associated classLoader.
+     * 创建WebappClassLoader类加载器
+     * 并且指定父类加载器,不使用默认的系统类加载器
      */
     private WebappClassLoaderBase createClassLoader()
             throws Exception {
@@ -737,6 +727,9 @@ public class WebappLoader extends LifecycleMBeanBase
         Class<?>[] argTypes = {ClassLoader.class};
         Object[] args = {parentClassLoader};
         Constructor<?> constr = clazz.getConstructor(argTypes);
+        /**
+         * 反射调用有参构造函数
+         */
         classLoader = (WebappClassLoaderBase) constr.newInstance(args);
 
         return classLoader;

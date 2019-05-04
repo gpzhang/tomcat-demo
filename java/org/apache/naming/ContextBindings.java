@@ -13,15 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package org.apache.naming;
 
-import java.util.Hashtable;
-
 import javax.naming.Context;
 import javax.naming.NamingException;
+import java.util.Hashtable;
 
 /**
  * Handles the associations :
@@ -41,43 +40,37 @@ public class ContextBindings {
     /**
      * Bindings name - naming context. Keyed by name.
      */
-    private static final Hashtable<Object,Context> contextNameBindings =
-        new Hashtable<Object,Context>();
+    private static final Hashtable<Object, Context> contextNameBindings = new Hashtable<Object, Context>();
 
 
     /**
      * Bindings thread - naming context. Keyed by thread id.
      */
-    private static final Hashtable<Thread,Context> threadBindings =
-        new Hashtable<Thread,Context>();
+    private static final Hashtable<Thread, Context> threadBindings = new Hashtable<Thread, Context>();
 
 
     /**
      * Bindings thread - name. Keyed by thread id.
      */
-    private static final Hashtable<Thread,Object> threadNameBindings =
-        new Hashtable<Thread,Object>();
+    private static final Hashtable<Thread, Object> threadNameBindings = new Hashtable<Thread, Object>();
 
 
     /**
      * Bindings class loader - naming context. Keyed by CL id.
      */
-    private static final Hashtable<ClassLoader,Context> clBindings =
-        new Hashtable<ClassLoader,Context>();
+    private static final Hashtable<ClassLoader, Context> clBindings = new Hashtable<ClassLoader, Context>();
 
 
     /**
      * Bindings class loader - name. Keyed by CL id.
      */
-    private static final Hashtable<ClassLoader,Object> clNameBindings =
-        new Hashtable<ClassLoader,Object>();
+    private static final Hashtable<ClassLoader, Object> clNameBindings = new Hashtable<ClassLoader, Object>();
 
 
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm = 
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     // --------------------------------------------------------- Public Methods
@@ -85,8 +78,8 @@ public class ContextBindings {
 
     /**
      * Binds a context name.
-     * 
-     * @param name Name of the context
+     *
+     * @param name    Name of the context
      * @param context Associated naming context instance
      */
     public static void bindContext(Object name, Context context) {
@@ -96,13 +89,12 @@ public class ContextBindings {
 
     /**
      * Binds a context name.
-     * 
-     * @param name Name of the context
+     *
+     * @param name    Name of the context
      * @param context Associated naming context instance
-     * @param token Security token
+     * @param token   Security token
      */
-    public static void bindContext(Object name, Context context, 
-                                   Object token) {
+    public static void bindContext(Object name, Context context, Object token) {
         if (ContextAccessController.checkSecurityToken(name, token))
             contextNameBindings.put(name, context);
     }
@@ -110,9 +102,8 @@ public class ContextBindings {
 
     /**
      * Unbind context name.
-     * 
-     * @param name Name of the context
      *
+     * @param name Name of the context
      * @deprecated - unused
      */
     @Deprecated
@@ -123,8 +114,8 @@ public class ContextBindings {
 
     /**
      * Unbind context name.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
     public static void unbindContext(Object name, Object token) {
@@ -135,7 +126,7 @@ public class ContextBindings {
 
     /**
      * Retrieve a naming context.
-     * 
+     *
      * @param name Name of the context
      */
     static Context getContext(Object name) {
@@ -145,31 +136,28 @@ public class ContextBindings {
 
     /**
      * Binds a naming context to a thread.
-     * 
-     * @param name Name of the context
      *
+     * @param name Name of the context
      * @deprecated - unused
      */
     @Deprecated
     public static void bindThread(Object name)
-        throws NamingException {
+            throws NamingException {
         bindThread(name, null);
     }
 
 
     /**
      * Binds a naming context to a thread.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void bindThread(Object name, Object token) 
-        throws NamingException {
+    public static void bindThread(Object name, Object token) throws NamingException {
         if (ContextAccessController.checkSecurityToken(name, token)) {
             Context context = contextNameBindings.get(name);
             if (context == null)
-                throw new NamingException
-                    (sm.getString("contextBindings.unknownContext", name));
+                throw new NamingException(sm.getString("contextBindings.unknownContext", name));
             threadBindings.put(Thread.currentThread(), context);
             threadNameBindings.put(Thread.currentThread(), name);
         }
@@ -178,9 +166,8 @@ public class ContextBindings {
 
     /**
      * Unbinds a naming context to a thread.
-     * 
-     * @param name Name of the context
      *
+     * @param name Name of the context
      * @deprecated - unused
      */
     @Deprecated
@@ -191,8 +178,8 @@ public class ContextBindings {
 
     /**
      * Unbinds a naming context to a thread.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
     public static void unbindThread(Object name, Object token) {
@@ -207,11 +194,11 @@ public class ContextBindings {
      * Retrieves the naming context bound to a thread.
      */
     public static Context getThread()
-        throws NamingException {
+            throws NamingException {
         Context context = threadBindings.get(Thread.currentThread());
         if (context == null)
             throw new NamingException
-                (sm.getString("contextBindings.noContextBoundToThread"));
+                    (sm.getString("contextBindings.noContextBoundToThread"));
         return context;
     }
 
@@ -220,11 +207,11 @@ public class ContextBindings {
      * Retrieves the naming context name bound to a thread.
      */
     static Object getThreadName()
-        throws NamingException {
+            throws NamingException {
         Object name = threadNameBindings.get(Thread.currentThread());
         if (name == null)
             throw new NamingException
-                (sm.getString("contextBindings.noContextBoundToThread"));
+                    (sm.getString("contextBindings.noContextBoundToThread"));
         return name;
     }
 
@@ -239,48 +226,46 @@ public class ContextBindings {
 
     /**
      * Binds a naming context to a class loader.
-     * 
-     * @param name Name of the context
      *
+     * @param name Name of the context
      * @deprecated - unused
      */
     @Deprecated
     public static void bindClassLoader(Object name)
-        throws NamingException {
+            throws NamingException {
         bindClassLoader(name, null);
     }
 
 
     /**
      * Binds a naming context to a thread.
-     * 
-     * @param name Name of the context
-     * @param token Security token
      *
+     * @param name  Name of the context
+     * @param token Security token
      * @deprecated - unused
      */
     @Deprecated
     public static void bindClassLoader(Object name, Object token)
-        throws NamingException {
+            throws NamingException {
         bindClassLoader
-            (name, token, Thread.currentThread().getContextClassLoader());
+                (name, token, Thread.currentThread().getContextClassLoader());
     }
 
 
     /**
      * Binds a naming context to a thread.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void bindClassLoader(Object name, Object token, 
-                                       ClassLoader classLoader) 
-        throws NamingException {
+    public static void bindClassLoader(Object name, Object token,
+                                       ClassLoader classLoader)
+            throws NamingException {
         if (ContextAccessController.checkSecurityToken(name, token)) {
             Context context = contextNameBindings.get(name);
             if (context == null)
                 throw new NamingException
-                    (sm.getString("contextBindings.unknownContext", name));
+                        (sm.getString("contextBindings.unknownContext", name));
             clBindings.put(classLoader, context);
             clNameBindings.put(classLoader, name);
         }
@@ -289,9 +274,8 @@ public class ContextBindings {
 
     /**
      * Unbinds a naming context to a class loader.
-     * 
-     * @param name Name of the context
      *
+     * @param name Name of the context
      * @deprecated - unused
      */
     @Deprecated
@@ -302,30 +286,29 @@ public class ContextBindings {
 
     /**
      * Unbinds a naming context to a class loader.
-     * 
-     * @param name Name of the context
-     * @param token Security token
      *
+     * @param name  Name of the context
+     * @param token Security token
      * @deprecated - unused
      */
     @Deprecated
     public static void unbindClassLoader(Object name, Object token) {
-        unbindClassLoader(name, token, 
-                          Thread.currentThread().getContextClassLoader());
+        unbindClassLoader(name, token,
+                Thread.currentThread().getContextClassLoader());
     }
 
 
     /**
      * Unbinds a naming context to a class loader.
-     * 
-     * @param name Name of the context
+     *
+     * @param name  Name of the context
      * @param token Security token
      */
-    public static void unbindClassLoader(Object name, Object token, 
+    public static void unbindClassLoader(Object name, Object token,
                                          ClassLoader classLoader) {
         if (ContextAccessController.checkSecurityToken(name, token)) {
             Object n = clNameBindings.get(classLoader);
-            if ((n==null) || !(n.equals(name))) {
+            if ((n == null) || !(n.equals(name))) {
                 return;
             }
             clBindings.remove(classLoader);
@@ -338,7 +321,7 @@ public class ContextBindings {
      * Retrieves the naming context bound to a class loader.
      */
     public static Context getClassLoader()
-        throws NamingException {
+            throws NamingException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Context context = null;
         do {
@@ -348,7 +331,7 @@ public class ContextBindings {
             }
         } while ((cl = cl.getParent()) != null);
         throw new NamingException
-            (sm.getString("contextBindings.noContextBoundToCL"));
+                (sm.getString("contextBindings.noContextBoundToCL"));
     }
 
 
@@ -356,7 +339,7 @@ public class ContextBindings {
      * Retrieves the naming context name bound to a class loader.
      */
     static Object getClassLoaderName()
-        throws NamingException {
+            throws NamingException {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         Object name = null;
         do {
@@ -366,7 +349,7 @@ public class ContextBindings {
             }
         } while ((cl = cl.getParent()) != null);
         throw new NamingException
-            (sm.getString("contextBindings.noContextBoundToCL"));
+                (sm.getString("contextBindings.noContextBoundToCL"));
     }
 
 

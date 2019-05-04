@@ -68,8 +68,7 @@ public class Catalina {
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     // ----------------------------------------------------- Instance Variables
@@ -88,8 +87,7 @@ public class Catalina {
     /**
      * The shared extensions class loader for this server.
      */
-    protected ClassLoader parentClassLoader =
-            Catalina.class.getClassLoader();
+    protected ClassLoader parentClassLoader = Catalina.class.getClassLoader();
 
 
     /**
@@ -181,6 +179,11 @@ public class Catalina {
 
     /**
      * Set the shared extensions class loader.
+     * <p>
+     * sharedLoader类加载器作为参数调用了
+     * Catalina的setParentClassLoader方法,
+     * 成为了整个Catalina容器的父类加载器,
+     * 当然也是WebAppClassLoader的父类加载器。
      *
      * @param parentClassLoader The shared extensions class loader.
      */
@@ -328,7 +331,8 @@ public class Catalina {
         digester.addSetProperties("Server");
         /**
          * 遇到"Server"结束符时，
-         * 调用“次顶层元素(Catalina)”的"setServer"方法，
+         * 即下面的digester.push(this)方法所设置的当前类的对象this
+         * 调用“次顶层元素(Catalina类)”的"setServer"方法，
          */
         digester.addSetNext("Server", "setServer", "org.apache.catalina.Server");
 
@@ -342,20 +346,30 @@ public class Catalina {
 
         digester.addObjectCreate("Server/Service", "org.apache.catalina.core.StandardService", "className");
         digester.addSetProperties("Server/Service");
+        /**
+         * 往StandardServer对象中添加StandardService对象
+         */
         digester.addSetNext("Server/Service", "addService", "org.apache.catalina.Service");
 
         digester.addObjectCreate("Server/Service/Listener", null, "className");
         digester.addSetProperties("Server/Service/Listener");
+
         digester.addSetNext("Server/Service/Listener", "addLifecycleListener", "org.apache.catalina.LifecycleListener");
 
         //Executor
         digester.addObjectCreate("Server/Service/Executor", "org.apache.catalina.core.StandardThreadExecutor", "className");
         digester.addSetProperties("Server/Service/Executor");
+        /**
+         * 往StandardService对象中添加StandardThreadExecutor对象
+         */
         digester.addSetNext("Server/Service/Executor", "addExecutor", "org.apache.catalina.Executor");
 
 
         digester.addRule("Server/Service/Connector", new ConnectorCreateRule());
         digester.addRule("Server/Service/Connector", new SetAllPropertiesRule(new String[]{"executor"}));
+        /**
+         * 往StandardService对象中添加Connector对象
+         */
         digester.addSetNext("Server/Service/Connector", "addConnector", "org.apache.catalina.connector.Connector");
 
 
@@ -364,6 +378,8 @@ public class Catalina {
         digester.addSetNext("Server/Service/Connector/Listener", "addLifecycleListener", "org.apache.catalina.LifecycleListener");
 
         // Add RuleSets for nested elements
+        //给嵌入元素添加RuleSet自定义规则
+        //每个rule规则，都会有tomcat对自身业务逻辑的判断和处理
         digester.addRuleSet(new NamingRuleSet("Server/GlobalNamingResources/"));
         digester.addRuleSet(new EngineRuleSet("Server/Service/"));
         digester.addRuleSet(new HostRuleSet("Server/Service/Engine/"));
@@ -445,8 +461,7 @@ public class Catalina {
             File file = configFile();
             FileInputStream fis = null;
             try {
-                InputSource is =
-                        new InputSource(file.toURI().toURL().toString());
+                InputSource is = new InputSource(file.toURI().toURL().toString());
                 fis = new FileInputStream(file);
                 is.setByteStream(fis);
                 digester.push(this);
@@ -742,8 +757,7 @@ public class Catalina {
         try {
             Server s = getServer();
             LifecycleState state = s.getState();
-            if (LifecycleState.STOPPING_PREP.compareTo(state) <= 0
-                    && LifecycleState.DESTROYED.compareTo(state) >= 0) {
+            if (LifecycleState.STOPPING_PREP.compareTo(state) <= 0 && LifecycleState.DESTROYED.compareTo(state) >= 0) {
                 // Nothing to do. stop() was already called
             } else {
                 s.stop();
@@ -905,8 +919,7 @@ public class Catalina {
     }
 
 
-    private static final org.apache.juli.logging.Log log =
-            org.apache.juli.logging.LogFactory.getLog(Catalina.class);
+    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(Catalina.class);
 
 }
 

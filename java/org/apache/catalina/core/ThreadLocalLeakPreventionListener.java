@@ -52,8 +52,7 @@ import org.apache.tomcat.util.threads.ThreadPoolExecutor;
  * This listener must be declared in server.xml to be active.
  * 
  */
-public class ThreadLocalLeakPreventionListener implements LifecycleListener,
-        ContainerListener {
+public class ThreadLocalLeakPreventionListener implements LifecycleListener, ContainerListener {
 
     private static final Log log =
         LogFactory.getLog(ThreadLocalLeakPreventionListener.class);
@@ -63,8 +62,7 @@ public class ThreadLocalLeakPreventionListener implements LifecycleListener,
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
     /**
      * Listens for {@link LifecycleEvent} for the start of the {@link Server} to
@@ -215,12 +213,10 @@ public class ThreadLocalLeakPreventionListener implements LifecycleListener,
                 }
 
                 if (executor instanceof ThreadPoolExecutor) {
-                    ThreadPoolExecutor threadPoolExecutor =
-                        (ThreadPoolExecutor) executor;
+                    ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
                     threadPoolExecutor.contextStopping();
                 } else if (executor instanceof StandardThreadExecutor) {
-                    StandardThreadExecutor stdThreadExecutor =
-                        (StandardThreadExecutor) executor;
+                    StandardThreadExecutor stdThreadExecutor = (StandardThreadExecutor) executor;
                     stdThreadExecutor.contextStopping();
                 }
 

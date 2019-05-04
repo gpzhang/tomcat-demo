@@ -30,7 +30,7 @@ public final class Globals {
      * deployment descriptor for this web application
      */
     public static final String ALT_DD_ATTR =
-        "org.apache.catalina.deploy.alt_dd";
+            "org.apache.catalina.deploy.alt_dd";
 
 
     /**
@@ -39,7 +39,7 @@ public final class Globals {
      * if any.
      */
     public static final String CERTIFICATES_ATTR =
-        "javax.servlet.request.X509Certificate";
+            "javax.servlet.request.X509Certificate";
 
 
     /**
@@ -48,21 +48,21 @@ public final class Globals {
      * java.lang.String).
      */
     public static final String CIPHER_SUITE_ATTR =
-        "javax.servlet.request.cipher_suite";
+            "javax.servlet.request.cipher_suite";
 
 
     /**
      * Request dispatcher state.
      */
     public static final String DISPATCHER_TYPE_ATTR =
-        "org.apache.catalina.core.DISPATCHER_TYPE";
+            "org.apache.catalina.core.DISPATCHER_TYPE";
 
 
     /**
      * Request dispatcher path.
      */
     public static final String DISPATCHER_REQUEST_PATH_ATTR =
-        "org.apache.catalina.core.DISPATCHER_REQUEST_PATH";
+            "org.apache.catalina.core.DISPATCHER_REQUEST_PATH";
 
 
     /**
@@ -70,7 +70,7 @@ public final class Globals {
      * context can be used to manipulate static files.
      */
     public static final String RESOURCES_ATTR =
-        "org.apache.catalina.resources";
+            "org.apache.catalina.resources";
 
 
     /**
@@ -79,7 +79,7 @@ public final class Globals {
      * delimited with the appropriate path delimiter for this platform.
      */
     public static final String CLASS_PATH_ATTR =
-        "org.apache.catalina.jsp_classpath";
+            "org.apache.catalina.jsp_classpath";
 
 
     /**
@@ -87,7 +87,7 @@ public final class Globals {
      * this SSL connection (as an object of type java.lang.Integer).
      */
     public static final String KEY_SIZE_ATTR =
-        "javax.servlet.request.key_size";
+            "javax.servlet.request.key_size";
 
 
     /**
@@ -95,41 +95,44 @@ public final class Globals {
      * for this SSL connection (as an object of type java.lang.String).
      */
     public static final String SSL_SESSION_ID_ATTR =
-        "javax.servlet.request.ssl_session_id";
+            "javax.servlet.request.ssl_session_id";
     /**
      * Tomcat specific attribute as used in Tomcat 6.
+     *
      * @deprecated
      */
     @Deprecated
     public static final String SSL_SESSION_ID_TOMCAT_ATTR =
-        "javax.servlet.request.ssl_session";
+            "javax.servlet.request.ssl_session";
 
     /**
      * The request attribute key for the session manager.
      * This one is a Tomcat extension to the Servlet spec.
      */
     public static final String SSL_SESSION_MGR_ATTR =
-        "javax.servlet.request.ssl_session_mgr";
+            "javax.servlet.request.ssl_session_mgr";
 
 
     /**
      * The servlet context attribute under which the managed bean Registry
      * will be stored for privileged contexts (if enabled).
+     *
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public static final String MBEAN_REGISTRY_ATTR =
-        "org.apache.catalina.Registry";
+            "org.apache.catalina.Registry";
 
 
     /**
      * The servlet context attribute under which the MBeanServer will be stored
      * for privileged contexts (if enabled).
+     *
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public static final String MBEAN_SERVER_ATTR =
-        "org.apache.catalina.MBeanServer";
+            "org.apache.catalina.MBeanServer";
 
 
     /**
@@ -137,7 +140,7 @@ public final class Globals {
      * named dispatcher request.
      */
     public static final String NAMED_DISPATCHER_ATTR =
-        "org.apache.catalina.NAMED";
+            "org.apache.catalina.NAMED";
 
 
     /**
@@ -148,8 +151,8 @@ public final class Globals {
      * as an object of type String)
      *
      * @deprecated Unused. This is no longer used as the CGIO servlet now has
-     *             generic handling for when it is used as an include.
-     *             This will be removed in Tomcat 10
+     * generic handling for when it is used as an include.
+     * This will be removed in Tomcat 10
      */
     @Deprecated
     public static final String SSI_FLAG_ATTR = "org.apache.catalina.ssi.SSIServlet";
@@ -159,22 +162,23 @@ public final class Globals {
      * The subject under which the AccessControlContext is running.
      */
     public static final String SUBJECT_ATTR =
-        "javax.security.auth.subject";
+            "javax.security.auth.subject";
 
 
     public static final String GSS_CREDENTIAL_ATTR =
-        "org.apache.catalina.realm.GSS_CREDENTIAL";
+            "org.apache.catalina.realm.GSS_CREDENTIAL";
 
 
     /**
      * All request attributes which names start with this prefix are used by
      * connector implementations. They are passed down to coyoteRequest and back
      * up. See <code>Request.setAttribute(String, Object)</code>.
+     *
      * @deprecated Unused. Will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public static final String TOMCAT_CONNECTOR_ATTR_PREFIX =
-        "org.apache.tomcat.";
+            "org.apache.tomcat.";
 
 
     /**
@@ -183,7 +187,7 @@ public final class Globals {
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String COMET_SUPPORTED_ATTR =
-        org.apache.coyote.Constants.COMET_SUPPORTED_ATTR;
+            org.apache.coyote.Constants.COMET_SUPPORTED_ATTR;
 
 
     /**
@@ -192,7 +196,7 @@ public final class Globals {
      * per-connection request timeout through Comet API.
      *
      * @see org.apache.catalina.comet.CometEvent#setTimeout(int)
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String COMET_TIMEOUT_SUPPORTED_ATTR =
@@ -205,17 +209,17 @@ public final class Globals {
      * timeout for Comet API. The value is in milliseconds.
      *
      * @see org.apache.catalina.comet.CometEvent#setTimeout(int)
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String COMET_TIMEOUT_ATTR =
-        org.apache.coyote.Constants.COMET_TIMEOUT_ATTR;
+            org.apache.coyote.Constants.COMET_TIMEOUT_ATTR;
 
 
     /**
      * The request attribute that is set to the value of {@code Boolean.TRUE}
      * if connector processing this request supports use of sendfile.
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String SENDFILE_SUPPORTED_ATTR =
@@ -227,7 +231,7 @@ public final class Globals {
      * to the connector the name of the file that is to be served
      * by sendfile. The value should be {@code java.lang.String}
      * that is {@code File.getCanonicalPath()} of the file to be served.
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String SENDFILE_FILENAME_ATTR =
@@ -240,7 +244,7 @@ public final class Globals {
      * that is to be served by sendfile. The value should be
      * {@code java.lang.Long}. To serve complete file
      * the value should be {@code Long.valueOf(0)}.
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String SENDFILE_FILE_START_ATTR =
@@ -253,7 +257,7 @@ public final class Globals {
      * of a file that is to be served by sendfile. The value should be
      * {@code java.lang.Long}. To serve complete file
      * the value should be equal to the length of the file.
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String SENDFILE_FILE_END_ATTR =
@@ -266,7 +270,7 @@ public final class Globals {
      * remote IP address claimed to be associated with this request when a
      * request is received via one or more proxies. It is typically provided via
      * the X-Forwarded-For HTTP header.
-     *
+     * <p>
      * Duplicated here for neater code in the catalina packages.
      */
     public static final String REMOTE_ADDR_ATTRIBUTE =
@@ -277,7 +281,7 @@ public final class Globals {
      *
      */
     public static final String ASYNC_SUPPORTED_ATTR =
-        "org.apache.catalina.ASYNC_SUPPORTED";
+            "org.apache.catalina.ASYNC_SUPPORTED";
 
 
     /**
@@ -288,7 +292,7 @@ public final class Globals {
      * happened during parameter parsing.
      */
     public static final String PARAMETER_PARSE_FAILED_ATTR =
-        "org.apache.catalina.parameter_parse_failed";
+            "org.apache.catalina.parameter_parse_failed";
 
 
     /**
@@ -303,14 +307,14 @@ public final class Globals {
      * compliance.
      */
     public static final boolean STRICT_SERVLET_COMPLIANCE =
-        Boolean.parseBoolean(System.getProperty("org.apache.catalina.STRICT_SERVLET_COMPLIANCE", "false"));
+            Boolean.parseBoolean(System.getProperty("org.apache.catalina.STRICT_SERVLET_COMPLIANCE", "false"));
 
 
     /**
      * Has security been turned on?
      */
     public static final boolean IS_SECURITY_ENABLED =
-        (System.getSecurityManager() != null);
+            (System.getSecurityManager() != null);
 
 
     /**

@@ -81,6 +81,9 @@ import java.io.IOException;
  * @author Remy Maucherat
  */
 
+/**
+ * Container的主要实现类 engine、host、context、wrapper
+ */
 public interface Container extends Lifecycle {
 
 

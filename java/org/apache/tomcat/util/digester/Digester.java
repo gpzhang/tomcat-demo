@@ -13,48 +13,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 package org.apache.tomcat.util.digester;
 
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.Permission;
-import java.util.EmptyStackException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.PropertyPermission;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 import org.apache.tomcat.util.IntrospectionUtils;
 import org.apache.tomcat.util.security.PermissionCheck;
-import org.xml.sax.Attributes;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
+import org.xml.sax.*;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.helpers.AttributesImpl;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.Permission;
+import java.util.*;
 
 
 /**
@@ -63,15 +44,15 @@ import org.xml.sax.helpers.AttributesImpl;
  * prior to the start of parsing.  This package was inspired by the
  * <code>XmlMapper</code> class that was part of Tomcat 3.0 and 3.1,
  * but is organized somewhat differently.</p>
- *
+ * <p>
  * <p>See the <a href="package-summary.html#package_description">Digester
  * Developer Guide</a> for more information.</p>
- *
+ * <p>
  * <p><strong>IMPLEMENTATION NOTE</strong> - A single Digester instance may
  * only be used within the context of a single thread at a time, and a call
  * to <code>parse()</code> must be completed before another can be initiated
  * even from the same thread.</p>
- *
+ * <p>
  * <p><strong>IMPLEMENTATION NOTE</strong> - A bug in Xerces 2.0.2 prevents
  * the support of XML schema. You need Xerces 2.1/2.3 and up to make
  * this class working with XML schema</p>
@@ -85,8 +66,8 @@ public class Digester extends DefaultHandler2 {
 
     static {
         String className = System.getProperty("org.apache.tomcat.util.digester.PROPERTY_SOURCE");
-        if (className!=null) {
-            ClassLoader[] cls = new ClassLoader[] {Digester.class.getClassLoader(),Thread.currentThread().getContextClassLoader()};
+        if (className != null) {
+            ClassLoader[] cls = new ClassLoader[]{Digester.class.getClassLoader(), Thread.currentThread().getContextClassLoader()};
             for (int i = 0; i < cls.length; i++) {
                 try {
                     Class<?> clazz = Class.forName(className, true, cls[i]);
@@ -95,7 +76,7 @@ public class Digester extends DefaultHandler2 {
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
                     LogFactory.getLog("org.apache.tomcat.util.digester.Digester").
-                        error("Unable to load property source["+className+"].",t);
+                            error("Unable to load property source[" + className + "].", t);
                 }
             }
         }
@@ -113,7 +94,7 @@ public class Digester extends DefaultHandler2 {
         super();
 
         if (propertySource != null) {
-            source = new IntrospectionUtils.PropertySource[] { propertySource, source[0] };
+            source = new IntrospectionUtils.PropertySource[]{propertySource, source[0]};
         }
 
     }
@@ -133,7 +114,7 @@ public class Digester extends DefaultHandler2 {
         this.parser = parser;
 
         if (propertySource != null) {
-            source = new IntrospectionUtils.PropertySource[] { propertySource, source[0] };
+            source = new IntrospectionUtils.PropertySource[]{propertySource, source[0]};
         }
 
     }
@@ -153,7 +134,7 @@ public class Digester extends DefaultHandler2 {
         this.reader = reader;
 
         if (propertySource != null) {
-            source = new IntrospectionUtils.PropertySource[] { propertySource, source[0] };
+            source = new IntrospectionUtils.PropertySource[]{propertySource, source[0]};
         }
 
     }
@@ -177,8 +158,8 @@ public class Digester extends DefaultHandler2 {
     }
 
 
-    protected IntrospectionUtils.PropertySource source[] = new IntrospectionUtils.PropertySource[] {
-            new SystemPropertySource() };
+    protected IntrospectionUtils.PropertySource source[] = new IntrospectionUtils.PropertySource[]{
+            new SystemPropertySource()};
 
 
     /**
@@ -191,7 +172,7 @@ public class Digester extends DefaultHandler2 {
      * The stack of body text string buffers for surrounding elements.
      */
     protected ArrayStack<StringBuilder> bodyTexts =
-        new ArrayStack<StringBuilder>();
+            new ArrayStack<StringBuilder>();
 
 
     /**
@@ -200,12 +181,12 @@ public class Digester extends DefaultHandler2 {
      * in the input is entered, the matching rules are pushed onto this
      * stack. After the end tag is reached, the matches are popped again.
      * The depth of is stack is therefore exactly the same as the current
-     * "nesting" level of the input xml. 
+     * "nesting" level of the input xml.
      *
      * @since 1.6
      */
     protected ArrayStack<List<Rule>> matches = new ArrayStack<List<Rule>>(10);
-    
+
     /**
      * The class loader to use for instantiating application objects.
      * If not specified, the context class loader, or the class loader
@@ -225,13 +206,13 @@ public class Digester extends DefaultHandler2 {
      * The EntityResolver used by the SAX parser. By default it use this class
      */
     protected EntityResolver entityResolver;
-    
+
     /**
      * The URLs of entityValidator that have been registered, keyed by the public
      * identifier that corresponds.
      */
-    protected HashMap<String,String> entityValidator =
-        new HashMap<String,String>();
+    protected HashMap<String, String> entityValidator =
+            new HashMap<String, String>();
 
 
     /**
@@ -272,8 +253,8 @@ public class Digester extends DefaultHandler2 {
      * is required because documents can declare nested uses of the same
      * prefix for different Namespace URIs).
      */
-    protected HashMap<String,ArrayStack<String>> namespaces =
-        new HashMap<String,ArrayStack<String>>();
+    protected HashMap<String, ArrayStack<String>> namespaces =
+            new HashMap<String, ArrayStack<String>>();
 
 
     /**
@@ -341,7 +322,7 @@ public class Digester extends DefaultHandler2 {
      */
     protected boolean rulesValidation = false;
 
-    
+
     /**
      * Fake attributes map (attributes are often used for object creation).
      */
@@ -352,20 +333,22 @@ public class Digester extends DefaultHandler2 {
      * The Log to which most logging calls will be made.
      */
     protected Log log =
-        LogFactory.getLog("org.apache.tomcat.util.digester.Digester");
+            LogFactory.getLog("org.apache.tomcat.util.digester.Digester");
 
 
     /**
      * The Log to which all SAX event related logging calls will be made.
      */
     protected Log saxLog =
-        LogFactory.getLog("org.apache.tomcat.util.digester.Digester.sax");
-    
-        
-    /** Stacks used for interrule communication, indexed by name String */
-    private HashMap<String,ArrayStack<Object>> stacksByName =
-        new HashMap<String,ArrayStack<Object>>();
-    
+            LogFactory.getLog("org.apache.tomcat.util.digester.Digester.sax");
+
+
+    /**
+     * Stacks used for interrule communication, indexed by name String
+     */
+    private HashMap<String, ArrayStack<Object>> stacksByName =
+            new HashMap<String, ArrayStack<Object>>();
+
     // ------------------------------------------------------------- Properties
 
     /**
@@ -376,7 +359,7 @@ public class Digester extends DefaultHandler2 {
      * @param prefix Prefix to look up
      */
     public String findNamespaceURI(String prefix) {
-        
+
         ArrayStack<String> stack = namespaces.get(prefix);
         if (stack == null) {
             return (null);
@@ -396,7 +379,7 @@ public class Digester extends DefaultHandler2 {
      * <ul>
      * <li>The class loader set by <code>setClassLoader()</code>, if any</li>
      * <li>The thread context class loader, if it exists and the
-     *     <code>useContextClassLoader</code> property is set to true</li>
+     * <code>useContextClassLoader</code> property is set to true</li>
      * <li>The class loader used to load the Digester class itself.
      * </ul>
      */
@@ -422,7 +405,7 @@ public class Digester extends DefaultHandler2 {
      * when required.
      *
      * @param classLoader The new class loader to use, or <code>null</code>
-     *  to revert to the standard rules
+     *                    to revert to the standard rules
      */
     public void setClassLoader(ClassLoader classLoader) {
 
@@ -480,13 +463,14 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * Return the SAXParserFactory we will use, creating one if necessary.
-     * @throws ParserConfigurationException 
-     * @throws SAXNotSupportedException 
-     * @throws SAXNotRecognizedException 
+     *
+     * @throws ParserConfigurationException
+     * @throws SAXNotSupportedException
+     * @throws SAXNotRecognizedException
      */
     public SAXParserFactory getFactory()
-    throws SAXNotRecognizedException, SAXNotSupportedException,
-    ParserConfigurationException {
+            throws SAXNotRecognizedException, SAXNotSupportedException,
+            ParserConfigurationException {
 
         if (factory == null) {
             factory = SAXParserFactory.newInstance();
@@ -524,17 +508,16 @@ public class Digester extends DefaultHandler2 {
      * for information about the standard SAX2 feature flags.
      *
      * @param feature Name of the feature to inquire about
-     *
-     * @exception ParserConfigurationException if a parser configuration error
-     *  occurs
-     * @exception SAXNotRecognizedException if the property name is
-     *  not recognized
-     * @exception SAXNotSupportedException if the property name is
-     *  recognized but not supported
+     * @throws ParserConfigurationException if a parser configuration error
+     *                                      occurs
+     * @throws SAXNotRecognizedException    if the property name is
+     *                                      not recognized
+     * @throws SAXNotSupportedException     if the property name is
+     *                                      recognized but not supported
      */
     public boolean getFeature(String feature)
-        throws ParserConfigurationException, SAXNotRecognizedException,
-        SAXNotSupportedException {
+            throws ParserConfigurationException, SAXNotRecognizedException,
+            SAXNotSupportedException {
 
         return (getFactory().getFeature(feature));
 
@@ -552,18 +535,17 @@ public class Digester extends DefaultHandler2 {
      * directly or indirectly.
      *
      * @param feature Name of the feature to set the status for
-     * @param value The new value for this feature
-     *
-     * @exception ParserConfigurationException if a parser configuration error
-     *  occurs
-     * @exception SAXNotRecognizedException if the property name is
-     *  not recognized
-     * @exception SAXNotSupportedException if the property name is
-     *  recognized but not supported
+     * @param value   The new value for this feature
+     * @throws ParserConfigurationException if a parser configuration error
+     *                                      occurs
+     * @throws SAXNotRecognizedException    if the property name is
+     *                                      not recognized
+     * @throws SAXNotSupportedException     if the property name is
+     *                                      recognized but not supported
      */
     public void setFeature(String feature, boolean value)
-        throws ParserConfigurationException, SAXNotRecognizedException,
-        SAXNotSupportedException {
+            throws ParserConfigurationException, SAXNotRecognizedException,
+            SAXNotSupportedException {
 
         getFactory().setFeature(feature, value);
 
@@ -596,20 +578,20 @@ public class Digester extends DefaultHandler2 {
      * @since 1.6
      */
     public Log getSAXLogger() {
-        
+
         return saxLog;
     }
-    
+
 
     /**
      * Sets the logger used for logging SAX-related information.
      * <strong>Note</strong> the output is finely grained.
-     * @param saxLog Log, not null
      *
+     * @param saxLog Log, not null
      * @since 1.6
-     */    
+     */
     public void setSAXLogger(Log saxLog) {
-    
+
         this.saxLog = saxLog;
     }
 
@@ -644,16 +626,17 @@ public class Digester extends DefaultHandler2 {
 
     }
 
-    
+
     /**
      * Set the public id of the current file being parse.
+     *
      * @param publicId the DTD/Schema public's id.
      */
-    public void setPublicId(String publicId){
+    public void setPublicId(String publicId) {
         this.publicId = publicId;
     }
-    
-    
+
+
     /**
      * Return the public identifier of the DTD we are currently
      * parsing under, if any.
@@ -681,8 +664,8 @@ public class Digester extends DefaultHandler2 {
      * added <code>Rule</code> objects.
      *
      * @param ruleNamespaceURI Namespace URI that must match on all
-     *  subsequently added rules, or <code>null</code> for matching
-     *  regardless of the current namespace URI
+     *                         subsequently added rules, or <code>null</code> for matching
+     *                         regardless of the current namespace URI
      */
     public void setRuleNamespaceURI(String ruleNamespaceURI) {
 
@@ -723,14 +706,13 @@ public class Digester extends DefaultHandler2 {
      * for information about the standard SAX2 properties.
      *
      * @param property Property name to be retrieved
-     *
-     * @exception SAXNotRecognizedException if the property name is
-     *  not recognized
-     * @exception SAXNotSupportedException if the property name is
-     *  recognized but not supported
+     * @throws SAXNotRecognizedException if the property name is
+     *                                   not recognized
+     * @throws SAXNotSupportedException  if the property name is
+     *                                   recognized but not supported
      */
     public Object getProperty(String property)
-        throws SAXNotRecognizedException, SAXNotSupportedException {
+            throws SAXNotRecognizedException, SAXNotSupportedException {
 
         return (getParser().getProperty(property));
 
@@ -745,15 +727,14 @@ public class Digester extends DefaultHandler2 {
      * for information about the standard SAX2 properties.
      *
      * @param property Property name to be set
-     * @param value Property value to be set
-     *
-     * @exception SAXNotRecognizedException if the property name is
-     *  not recognized
-     * @exception SAXNotSupportedException if the property name is
-     *  recognized but not supported
+     * @param value    Property value to be set
+     * @throws SAXNotRecognizedException if the property name is
+     *                                   not recognized
+     * @throws SAXNotSupportedException  if the property name is
+     *                                   recognized but not supported
      */
     public void setProperty(String property, Object value)
-        throws SAXNotRecognizedException, SAXNotSupportedException {
+            throws SAXNotRecognizedException, SAXNotSupportedException {
 
         getParser().setProperty(property, value);
 
@@ -775,7 +756,7 @@ public class Digester extends DefaultHandler2 {
 
     }
 
-    
+
     /**
      * Set the <code>Rules</code> implementation object containing our
      * rules collection and associated matching policy.
@@ -907,27 +888,27 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * Return the XMLReader to be used for parsing the input document.
-     *
-     * FIX ME: there is a bug in JAXP/XERCES that prevent the use of a 
+     * <p>
+     * FIX ME: there is a bug in JAXP/XERCES that prevent the use of a
      * parser that contains a schema with a DTD.
-     * @exception SAXException if no XMLReader can be instantiated
+     *
+     * @throws SAXException if no XMLReader can be instantiated
      */
     public XMLReader getXMLReader() throws SAXException {
-        if (reader == null){
+        if (reader == null) {
             reader = getParser().getXMLReader();
-        }        
-                               
-        reader.setDTDHandler(this);           
-        reader.setContentHandler(this);        
-        
-        if (entityResolver == null){
+        }
+
+        reader.setDTDHandler(this);
+        reader.setContentHandler(this);
+
+        if (entityResolver == null) {
             reader.setEntityResolver(this);
         } else {
-            reader.setEntityResolver(entityResolver);           
+            reader.setEntityResolver(entityResolver);
         }
-        
-        reader.setProperty(
-                "http://xml.org/sax/properties/lexical-handler", this);
+
+        reader.setProperty("http://xml.org/sax/properties/lexical-handler", this);
 
         reader.setErrorHandler(this);
         return reader;
@@ -941,10 +922,9 @@ public class Digester extends DefaultHandler2 {
      * an XML element.
      *
      * @param buffer The characters from the XML document
-     * @param start Starting offset into the buffer
+     * @param start  Starting offset into the buffer
      * @param length Number of characters from the buffer
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void characters(char buffer[], int start, int length)
@@ -962,7 +942,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Process notification of the end of the document being reached.
      *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void endDocument() throws SAXException {
@@ -970,7 +950,7 @@ public class Digester extends DefaultHandler2 {
         if (saxLog.isDebugEnabled()) {
             if (getCount() > 1) {
                 saxLog.debug("endDocument():  " + getCount() +
-                             " elements left");
+                        " elements left");
             } else {
                 saxLog.debug("endDocument()");
             }
@@ -1005,13 +985,13 @@ public class Digester extends DefaultHandler2 {
      * Process notification of the end of an XML element being reached.
      *
      * @param namespaceURI - The Namespace URI, or the empty string if the
-     *   element has no Namespace URI or if Namespace processing is not
-     *   being performed.
-     * @param localName - The local name (without prefix), or the empty
-     *   string if Namespace processing is not being performed.
-     * @param qName - The qualified XML 1.0 name (with prefix), or the
-     *   empty string if qualified names are not available.
-     * @exception SAXException if a parsing error is to be reported
+     *                     element has no Namespace URI or if Namespace processing is not
+     *                     being performed.
+     * @param localName    - The local name (without prefix), or the empty
+     *                     string if Namespace processing is not being performed.
+     * @param qName        - The qualified XML 1.0 name (with prefix), or the
+     *                     empty string if qualified names are not available.
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void endElement(String namespaceURI, String localName,
@@ -1104,8 +1084,7 @@ public class Digester extends DefaultHandler2 {
      * Process notification that a namespace prefix is going out of scope.
      *
      * @param prefix Prefix that is going out of scope
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void endPrefixMapping(String prefix) throws SAXException {
@@ -1135,10 +1114,9 @@ public class Digester extends DefaultHandler2 {
      * an XML element.
      *
      * @param buffer The characters from the XML document
-     * @param start Starting offset into the buffer
-     * @param len Number of characters from the buffer
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @param start  Starting offset into the buffer
+     * @param len    Number of characters from the buffer
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void ignorableWhitespace(char buffer[], int start, int len)
@@ -1158,9 +1136,8 @@ public class Digester extends DefaultHandler2 {
      * Process notification of a processing instruction that was encountered.
      *
      * @param target The processing instruction target
-     * @param data The processing instruction data (if any)
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @param data   The processing instruction data (if any)
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void processingInstruction(String target, String data)
@@ -1207,8 +1184,7 @@ public class Digester extends DefaultHandler2 {
      * Process notification of a skipped entity.
      *
      * @param name Name of the skipped entity
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void skippedEntity(String name) throws SAXException {
@@ -1225,7 +1201,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Process notification of the beginning of the document being reached.
      *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void startDocument() throws SAXException {
@@ -1245,29 +1221,29 @@ public class Digester extends DefaultHandler2 {
      * Process notification of the start of an XML element being reached.
      *
      * @param namespaceURI The Namespace URI, or the empty string if the element
-     *   has no Namespace URI or if Namespace processing is not being performed.
-     * @param localName The local name (without prefix), or the empty
-     *   string if Namespace processing is not being performed.
-     * @param qName The qualified name (with prefix), or the empty
-     *   string if qualified names are not available.\
-     * @param list The attributes attached to the element. If there are
-     *   no attributes, it shall be an empty Attributes object. 
-     * @exception SAXException if a parsing error is to be reported
+     *                     has no Namespace URI or if Namespace processing is not being performed.
+     * @param localName    The local name (without prefix), or the empty
+     *                     string if Namespace processing is not being performed.
+     * @param qName        The qualified name (with prefix), or the empty
+     *                     string if qualified names are not available.\
+     * @param list         The attributes attached to the element. If there are
+     *                     no attributes, it shall be an empty Attributes object.
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void startElement(String namespaceURI, String localName,
                              String qName, Attributes list)
             throws SAXException {
         boolean debug = log.isDebugEnabled();
-        
+
         if (saxLog.isDebugEnabled()) {
             saxLog.debug("startElement(" + namespaceURI + "," + localName + "," +
                     qName + ")");
         }
-        
+
         // Parse system properties
         list = updateAttributes(list);
-        
+
         // Save the body text accumulated for our surrounding element
         bodyTexts.push(bodyText);
         bodyText = new StringBuilder();
@@ -1321,10 +1297,9 @@ public class Digester extends DefaultHandler2 {
     /**
      * Process notification that a namespace prefix is coming in to scope.
      *
-     * @param prefix Prefix that is being declared
+     * @param prefix       Prefix that is being declared
      * @param namespaceURI Corresponding namespace URI being mapped to
-     *
-     * @exception SAXException if a parsing error is to be reported
+     * @throws SAXException if a parsing error is to be reported
      */
     @Override
     public void startPrefixMapping(String prefix, String namespaceURI)
@@ -1351,7 +1326,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Receive notification of a notation declaration event.
      *
-     * @param name The notation name
+     * @param name     The notation name
      * @param publicId The public identifier (if any)
      * @param systemId The system identifier (if any)
      */
@@ -1369,7 +1344,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Receive notification of an unparsed entity declaration event.
      *
-     * @param name The unparsed entity name
+     * @param name     The unparsed entity name
      * @param publicId The public identifier (if any)
      * @param systemId The system identifier (if any)
      * @param notation The name of the associated notation
@@ -1392,50 +1367,52 @@ public class Digester extends DefaultHandler2 {
      * Set the <code>EntityResolver</code> used by SAX when resolving
      * public id and system id.
      * This must be called before the first call to <code>parse()</code>.
+     *
      * @param entityResolver a class that implement the <code>EntityResolver</code> interface.
      */
-    public void setEntityResolver(EntityResolver entityResolver){
+    public void setEntityResolver(EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
     }
-    
-    
+
+
     /**
      * Return the Entity Resolver used by the SAX parser.
+     *
      * @return Return the Entity Resolver used by the SAX parser.
      */
-    public EntityResolver getEntityResolver(){
+    public EntityResolver getEntityResolver() {
         return entityResolver;
     }
 
     @Override
     public InputSource resolveEntity(String name, String publicId,
-            String baseURI, String systemId) throws SAXException, IOException {
+                                     String baseURI, String systemId) throws SAXException, IOException {
 
         if (saxLog.isDebugEnabled()) {
             saxLog.debug("resolveEntity('" + publicId + "', '" + systemId +
                     "', '" + baseURI + "')");
         }
-        
+
         // Has this system identifier been registered?
         String entityURL = null;
         if (publicId != null) {
             entityURL = entityValidator.get(publicId);
         }
-         
-        if (entityURL == null) { 
+
+        if (entityURL == null) {
             if (systemId == null) {
                 // cannot resolve
                 if (log.isDebugEnabled()) {
                     log.debug(" Cannot resolve entity: '" + publicId + "'");
                 }
                 return (null);
-                
+
             } else {
                 // try to resolve using system ID
                 if (log.isDebugEnabled()) {
                     log.debug(" Trying to resolve using system ID '" +
                             systemId + "'");
-                } 
+                }
                 entityURL = systemId;
                 // resolve systemId against baseURI if it is not absolute
                 if (baseURI != null) {
@@ -1453,12 +1430,12 @@ public class Digester extends DefaultHandler2 {
                 }
             }
         }
-        
+
         // Return an input source to our alternative URL
         if (log.isDebugEnabled()) {
             log.debug(" Resolving to alternate DTD '" + entityURL + "'");
-        }  
-        
+        }
+
         try {
             return (new InputSource(entityURL));
         } catch (Exception e) {
@@ -1483,8 +1460,7 @@ public class Digester extends DefaultHandler2 {
      * error handler (if any).
      *
      * @param exception The error information
-     *
-     * @exception SAXException if a parsing exception occurs
+     * @throws SAXException if a parsing exception occurs
      */
     @Override
     public void error(SAXParseException exception) throws SAXException {
@@ -1504,8 +1480,7 @@ public class Digester extends DefaultHandler2 {
      * supplied error handler (if any).
      *
      * @param exception The fatal error information
-     *
-     * @exception SAXException if a parsing exception occurs
+     * @throws SAXException if a parsing exception occurs
      */
     @Override
     public void fatalError(SAXParseException exception) throws SAXException {
@@ -1525,16 +1500,15 @@ public class Digester extends DefaultHandler2 {
      * error handler (if any).
      *
      * @param exception The warning information
-     *
-     * @exception SAXException if a parsing exception occurs
+     * @throws SAXException if a parsing exception occurs
      */
     @Override
     public void warning(SAXParseException exception) throws SAXException {
-         if (errorHandler != null) {
+        if (errorHandler != null) {
             log.warn("Parse Warning Error at line " + exception.getLineNumber() +
-                " column " + exception.getColumnNumber() + ": " +
-                exception.getMessage(), exception);
-            
+                    " column " + exception.getColumnNumber() + ": " +
+                    exception.getMessage(), exception);
+
             errorHandler.warning(exception);
         }
 
@@ -1548,9 +1522,8 @@ public class Digester extends DefaultHandler2 {
      * the root element from the object stack (if any).
      *
      * @param file File containing the XML data to be parsed
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception SAXException if a parsing exception occurs
+     * @throws IOException  if an input/output error occurs
+     * @throws SAXException if a parsing exception occurs
      */
     public Object parse(File file) throws IOException, SAXException {
 
@@ -1560,18 +1533,18 @@ public class Digester extends DefaultHandler2 {
         getXMLReader().parse(input);
         return (root);
 
-    }   
+    }
+
     /**
      * Parse the content of the specified input source using this Digester.
      * Returns the root element from the object stack (if any).
      *
      * @param input Input source containing the XML data to be parsed
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception SAXException if a parsing exception occurs
+     * @throws IOException  if an input/output error occurs
+     * @throws SAXException if a parsing exception occurs
      */
     public Object parse(InputSource input) throws IOException, SAXException {
- 
+
         configure();
         getXMLReader().parse(input);
         return (root);
@@ -1584,9 +1557,8 @@ public class Digester extends DefaultHandler2 {
      * Returns the root element from the object stack (if any).
      *
      * @param input Input stream containing the XML data to be parsed
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception SAXException if a parsing exception occurs
+     * @throws IOException  if an input/output error occurs
+     * @throws SAXException if a parsing exception occurs
      */
     public Object parse(InputStream input) throws IOException, SAXException {
 
@@ -1603,9 +1575,8 @@ public class Digester extends DefaultHandler2 {
      * Returns the root element from the object stack (if any).
      *
      * @param reader Reader containing the XML data to be parsed
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception SAXException if a parsing exception occurs
+     * @throws IOException  if an input/output error occurs
+     * @throws SAXException if a parsing exception occurs
      */
     public Object parse(Reader reader) throws IOException, SAXException {
 
@@ -1622,9 +1593,8 @@ public class Digester extends DefaultHandler2 {
      * Returns the root element from the object stack (if any).
      *
      * @param uri URI containing the XML data to be parsed
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception SAXException if a parsing exception occurs
+     * @throws IOException  if an input/output error occurs
+     * @throws SAXException if a parsing exception occurs
      */
     public Object parse(String uri) throws IOException, SAXException {
 
@@ -1641,20 +1611,21 @@ public class Digester extends DefaultHandler2 {
      * This must be called before the first call to <code>parse()</code>.
      * </p><p>
      * <code>Digester</code> contains an internal <code>EntityResolver</code>
-     * implementation. This maps <code>PUBLICID</code>'s to URLs 
+     * implementation. This maps <code>PUBLICID</code>'s to URLs
      * (from which the resource will be loaded). A common use case for this
-     * method is to register local URLs (possibly computed at runtime by a 
+     * method is to register local URLs (possibly computed at runtime by a
      * classloader) for DTDs. This allows the performance advantage of using
      * a local version without having to ensure every <code>SYSTEM</code>
      * URI on every processed xml document is local. This implementation provides
      * only basic functionality. If more sophisticated features are required,
      * using {@link #setEntityResolver} to set a custom resolver is recommended.
      * </p><p>
-     * <strong>Note:</strong> This method will have no effect when a custom 
-     * <code>EntityResolver</code> has been set. (Setting a custom 
-     * <code>EntityResolver</code> overrides the internal implementation.) 
+     * <strong>Note:</strong> This method will have no effect when a custom
+     * <code>EntityResolver</code> has been set. (Setting a custom
+     * <code>EntityResolver</code> overrides the internal implementation.)
      * </p>
-     * @param publicId Public identifier of the DTD to be resolved
+     *
+     * @param publicId  Public identifier of the DTD to be resolved
      * @param entityURL The URL to use for reading this DTD
      */
     public void register(String publicId, String entityURL) {
@@ -1675,7 +1646,7 @@ public class Digester extends DefaultHandler2 {
      * This method sets the <code>Digester</code> property on the rule.</p>
      *
      * @param pattern Element matching pattern
-     * @param rule Rule to be registered
+     * @param rule    Rule to be registered
      */
     public void addRule(String pattern, Rule rule) {
 
@@ -1711,7 +1682,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add an "call method" rule for a method which accepts no arguments.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to be called
      * @see CallMethodRule
      */
@@ -1726,10 +1697,10 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add an "call method" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to be called
      * @param paramCount Number of expected parameters (or zero
-     *  for a single parameter from the body of this element)
+     *                   for a single parameter from the body of this element)
      * @see CallMethodRule
      */
     public void addCallMethod(String pattern, String methodName,
@@ -1748,15 +1719,15 @@ public class Digester extends DefaultHandler2 {
      * method, unless <code>paramTypes</code> is null or empty, in this
      * case the rule will call the specified method with no arguments.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to be called
      * @param paramCount Number of expected parameters (or zero
-     *  for a single parameter from the body of this element)
+     *                   for a single parameter from the body of this element)
      * @param paramTypes Set of Java class names for the types
-     *  of the expected parameters
-     *  (if you wish to use a primitive type, specify the corresponding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
+     *                   of the expected parameters
+     *                   (if you wish to use a primitive type, specify the corresponding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
      * @see CallMethodRule
      */
     public void addCallMethod(String pattern, String methodName,
@@ -1764,9 +1735,9 @@ public class Digester extends DefaultHandler2 {
 
         addRule(pattern,
                 new CallMethodRule(
-                                    methodName,
-                                    paramCount, 
-                                    paramTypes));
+                        methodName,
+                        paramCount,
+                        paramTypes));
 
     }
 
@@ -1778,14 +1749,14 @@ public class Digester extends DefaultHandler2 {
      * method, unless <code>paramTypes</code> is null or empty, in this
      * case the rule will call the specified method with no arguments.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to be called
      * @param paramCount Number of expected parameters (or zero
-     *  for a single parameter from the body of this element)
+     *                   for a single parameter from the body of this element)
      * @param paramTypes The Java class names of the arguments
-     *  (if you wish to use a primitive type, specify the corresponding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
+     *                   (if you wish to use a primitive type, specify the corresponding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
      * @see CallMethodRule
      */
     public void addCallMethod(String pattern, String methodName,
@@ -1793,9 +1764,9 @@ public class Digester extends DefaultHandler2 {
 
         addRule(pattern,
                 new CallMethodRule(
-                                    methodName,
-                                    paramCount, 
-                                    paramTypes));
+                        methodName,
+                        paramCount,
+                        paramTypes));
 
     }
 
@@ -1803,9 +1774,9 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "call parameter" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param paramIndex Zero-relative parameter index to set
-     *  (from the body of this element)
+     *                   (from the body of this element)
      * @see CallParamRule
      */
     public void addCallParam(String pattern, int paramIndex) {
@@ -1819,11 +1790,11 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "call parameter" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param paramIndex Zero-relative parameter index to set
-     *  (from the specified attribute)
+     * @param pattern       Element matching pattern
+     * @param paramIndex    Zero-relative parameter index to set
+     *                      (from the specified attribute)
      * @param attributeName Attribute whose value is used as the
-     *  parameter value
+     *                      parameter value
      * @see CallParamRule
      */
     public void addCallParam(String pattern, int paramIndex,
@@ -1837,18 +1808,18 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * Add a "call parameter" rule.
-     * This will either take a parameter from the stack 
-     * or from the current element body text. 
+     * This will either take a parameter from the stack
+     * or from the current element body text.
      *
      * @param paramIndex The zero-relative parameter number
-     * @param fromStack Should the call parameter be taken from the top of the stack?
+     * @param fromStack  Should the call parameter be taken from the top of the stack?
      * @see CallParamRule
-     */    
+     */
     public void addCallParam(String pattern, int paramIndex, boolean fromStack) {
-    
+
         addRule(pattern,
                 new CallParamRule(paramIndex, fromStack));
-      
+
     }
 
     /**
@@ -1857,31 +1828,31 @@ public class Digester extends DefaultHandler2 {
      *
      * @param paramIndex The zero-relative parameter number
      * @param stackIndex set the call parameter to the stackIndex'th object down the stack,
-     * where 0 is the top of the stack, 1 the next element down and so on
+     *                   where 0 is the top of the stack, 1 the next element down and so on
      * @see CallMethodRule
-     */    
+     */
     public void addCallParam(String pattern, int paramIndex, int stackIndex) {
-    
+
         addRule(pattern,
                 new CallParamRule(paramIndex, stackIndex));
-      
+
     }
-    
+
     /**
-     * Add a "call parameter" rule that sets a parameter from the current 
+     * Add a "call parameter" rule that sets a parameter from the current
      * <code>Digester</code> matching path.
      * This is sometimes useful when using rules that support wildcards.
      *
-     * @param pattern the pattern that this rule should match
+     * @param pattern    the pattern that this rule should match
      * @param paramIndex The zero-relative parameter number
      * @see CallMethodRule
      */
-    public void addCallParamPath(String pattern,int paramIndex) {
+    public void addCallParamPath(String pattern, int paramIndex) {
         addRule(pattern, new PathCallParamRule(paramIndex));
     }
-    
+
     /**
-     * Add a "call parameter" rule that sets a parameter from a 
+     * Add a "call parameter" rule that sets a parameter from a
      * caller-provided object. This can be used to pass constants such as
      * strings to methods; it can also be used to pass mutable objects,
      * providing ways for objects to do things like "register" themselves
@@ -1894,25 +1865,24 @@ public class Digester extends DefaultHandler2 {
      * type, according to the usual type-conversion rules).
      *
      * @param paramIndex The zero-relative parameter number
-     * @param paramObj Any arbitrary object to be passed to the target
-     * method.
+     * @param paramObj   Any arbitrary object to be passed to the target
+     *                   method.
      * @see CallMethodRule
-     *
      * @since 1.6
-     */    
-    public void addObjectParam(String pattern, int paramIndex, 
+     */
+    public void addObjectParam(String pattern, int paramIndex,
                                Object paramObj) {
-    
+
         addRule(pattern,
                 new ObjectParamRule(paramIndex, paramObj));
-      
+
     }
-    
+
     /**
      * Add a "factory create" rule for the specified parameters.
      * Exceptions thrown during the object creation process will be propagated.
      *
-     * @param pattern Element matching pattern
+     * @param pattern   Element matching pattern
      * @param className Java class name of the object creation factory class
      * @see FactoryCreateRule
      */
@@ -1928,7 +1898,7 @@ public class Digester extends DefaultHandler2 {
      * Exceptions thrown during the object creation process will be propagated.
      *
      * @param pattern Element matching pattern
-     * @param clazz Java class of the object creation factory class
+     * @param clazz   Java class of the object creation factory class
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(String pattern, Class<?> clazz) {
@@ -1942,10 +1912,10 @@ public class Digester extends DefaultHandler2 {
      * Add a "factory create" rule for the specified parameters.
      * Exceptions thrown during the object creation process will be propagated.
      *
-     * @param pattern Element matching pattern
-     * @param className Java class name of the object creation factory class
+     * @param pattern       Element matching pattern
+     * @param className     Java class name of the object creation factory class
      * @param attributeName Attribute name which, if present, overrides the
-     *  value specified by <code>className</code>
+     *                      value specified by <code>className</code>
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(String pattern, String className,
@@ -1960,10 +1930,10 @@ public class Digester extends DefaultHandler2 {
      * Add a "factory create" rule for the specified parameters.
      * Exceptions thrown during the object creation process will be propagated.
      *
-     * @param pattern Element matching pattern
-     * @param clazz Java class of the object creation factory class
+     * @param pattern       Element matching pattern
+     * @param clazz         Java class of the object creation factory class
      * @param attributeName Attribute name which, if present, overrides the
-     *  value specified by <code>className</code>
+     *                      value specified by <code>className</code>
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(String pattern, Class<?> clazz,
@@ -1978,9 +1948,9 @@ public class Digester extends DefaultHandler2 {
      * Add a "factory create" rule for the specified parameters.
      * Exceptions thrown during the object creation process will be propagated.
      *
-     * @param pattern Element matching pattern
+     * @param pattern         Element matching pattern
      * @param creationFactory Previously instantiated ObjectCreationFactory
-     *  to be utilized
+     *                        to be utilized
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(String pattern,
@@ -1993,16 +1963,16 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "factory create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param className Java class name of the object creation factory class
+     * @param pattern                Element matching pattern
+     * @param className              Java class name of the object creation factory class
      * @param ignoreCreateExceptions when <code>true</code> any exceptions thrown during
-     * object creation will be ignored.
+     *                               object creation will be ignored.
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(
-                                    String pattern, 
-                                    String className,
-                                    boolean ignoreCreateExceptions) {
+            String pattern,
+            String className,
+            boolean ignoreCreateExceptions) {
 
         addRule(
                 pattern,
@@ -2014,16 +1984,16 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "factory create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param clazz Java class of the object creation factory class
+     * @param pattern                Element matching pattern
+     * @param clazz                  Java class of the object creation factory class
      * @param ignoreCreateExceptions when <code>true</code> any exceptions thrown during
-     * object creation will be ignored.
+     *                               object creation will be ignored.
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(
-                                    String pattern, 
-                                    Class<?> clazz,
-                                    boolean ignoreCreateExceptions) {
+            String pattern,
+            Class<?> clazz,
+            boolean ignoreCreateExceptions) {
 
         addRule(
                 pattern,
@@ -2035,19 +2005,19 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "factory create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param className Java class name of the object creation factory class
-     * @param attributeName Attribute name which, if present, overrides the
-     *  value specified by <code>className</code>
+     * @param pattern                Element matching pattern
+     * @param className              Java class name of the object creation factory class
+     * @param attributeName          Attribute name which, if present, overrides the
+     *                               value specified by <code>className</code>
      * @param ignoreCreateExceptions when <code>true</code> any exceptions thrown during
-     * object creation will be ignored.
+     *                               object creation will be ignored.
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(
-                                String pattern, 
-                                String className,
-                                String attributeName,
-                                boolean ignoreCreateExceptions) {
+            String pattern,
+            String className,
+            String attributeName,
+            boolean ignoreCreateExceptions) {
 
         addRule(
                 pattern,
@@ -2059,19 +2029,19 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "factory create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param clazz Java class of the object creation factory class
-     * @param attributeName Attribute name which, if present, overrides the
-     *  value specified by <code>className</code>
+     * @param pattern                Element matching pattern
+     * @param clazz                  Java class of the object creation factory class
+     * @param attributeName          Attribute name which, if present, overrides the
+     *                               value specified by <code>className</code>
      * @param ignoreCreateExceptions when <code>true</code> any exceptions thrown during
-     * object creation will be ignored.
+     *                               object creation will be ignored.
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(
-                                    String pattern, 
-                                    Class<?> clazz,
-                                    String attributeName,
-                                    boolean ignoreCreateExceptions) {
+            String pattern,
+            Class<?> clazz,
+            String attributeName,
+            boolean ignoreCreateExceptions) {
 
         addRule(
                 pattern,
@@ -2083,11 +2053,11 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "factory create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param creationFactory Previously instantiated ObjectCreationFactory
-     *  to be utilized
+     * @param pattern                Element matching pattern
+     * @param creationFactory        Previously instantiated ObjectCreationFactory
+     *                               to be utilized
      * @param ignoreCreateExceptions when <code>true</code> any exceptions thrown during
-     * object creation will be ignored.
+     *                               object creation will be ignored.
      * @see FactoryCreateRule
      */
     public void addFactoryCreate(String pattern,
@@ -2103,7 +2073,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add an "object create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern   Element matching pattern
      * @param className Java class name to be created
      * @see ObjectCreateRule
      */
@@ -2119,7 +2089,7 @@ public class Digester extends DefaultHandler2 {
      * Add an "object create" rule for the specified parameters.
      *
      * @param pattern Element matching pattern
-     * @param clazz Java class to be created
+     * @param clazz   Java class to be created
      * @see ObjectCreateRule
      */
     public void addObjectCreate(String pattern, Class<?> clazz) {
@@ -2133,10 +2103,10 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add an "object create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
-     * @param className Default Java class name to be created
+     * @param pattern       Element matching pattern
+     * @param className     Default Java class name to be created
      * @param attributeName Attribute name that optionally overrides
-     *  the default Java class name to be created
+     *                      the default Java class name to be created
      * @see ObjectCreateRule
      */
     public void addObjectCreate(String pattern, String className,
@@ -2151,10 +2121,10 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add an "object create" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern       Element matching pattern
      * @param attributeName Attribute name that optionally overrides
-     * @param clazz Default Java class to be created
-     *  the default Java class name to be created
+     * @param clazz         Default Java class to be created
+     *                      the default Java class name to be created
      * @see ObjectCreateRule
      */
     public void addObjectCreate(String pattern,
@@ -2169,7 +2139,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "set next" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the parent element
      * @see SetNextRule
      */
@@ -2184,12 +2154,12 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "set next" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the parent element
-     * @param paramType Java class name of the expected parameter type
-     *  (if you wish to use a primitive type, specify the corresponding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
+     * @param paramType  Java class name of the expected parameter type
+     *                   (if you wish to use a primitive type, specify the corresponding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
      * @see SetNextRule
      */
     public void addSetNext(String pattern, String methodName,
@@ -2204,7 +2174,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add {@link SetRootRule} with the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the root object
      * @see SetRootRule
      */
@@ -2219,9 +2189,9 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add {@link SetRootRule} with the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the root object
-     * @param paramType Java class name of the expected parameter type
+     * @param paramType  Java class name of the expected parameter type
      * @see SetRootRule
      */
     public void addSetRoot(String pattern, String methodName,
@@ -2249,15 +2219,15 @@ public class Digester extends DefaultHandler2 {
      * Add a "set properties" rule with a single overridden parameter.
      * See {@link SetPropertiesRule#SetPropertiesRule(String attributeName, String propertyName)}
      *
-     * @param pattern Element matching pattern
+     * @param pattern       Element matching pattern
      * @param attributeName map this attribute
-     * @param propertyName to this property
+     * @param propertyName  to this property
      * @see SetPropertiesRule
      */
     public void addSetProperties(
-                                String pattern, 
-                                String attributeName,
-                                String propertyName) {
+            String pattern,
+            String attributeName,
+            String propertyName) {
 
         addRule(pattern,
                 new SetPropertiesRule(attributeName, propertyName));
@@ -2268,15 +2238,15 @@ public class Digester extends DefaultHandler2 {
      * Add a "set properties" rule with overridden parameters.
      * See {@link SetPropertiesRule#SetPropertiesRule(String [] attributeNames, String [] propertyNames)}
      *
-     * @param pattern Element matching pattern
+     * @param pattern        Element matching pattern
      * @param attributeNames names of attributes with custom mappings
-     * @param propertyNames property names these attributes map to
+     * @param propertyNames  property names these attributes map to
      * @see SetPropertiesRule
      */
     public void addSetProperties(
-                                String pattern, 
-                                String [] attributeNames,
-                                String [] propertyNames) {
+            String pattern,
+            String[] attributeNames,
+            String[] propertyNames) {
 
         addRule(pattern,
                 new SetPropertiesRule(attributeNames, propertyNames));
@@ -2288,8 +2258,8 @@ public class Digester extends DefaultHandler2 {
      * Add a "set property" rule for the specified parameters.
      *
      * @param pattern Element matching pattern
-     * @param name Attribute name containing the property name to be set
-     * @param value Attribute name containing the property value to set
+     * @param name    Attribute name containing the property name to be set
+     * @param value   Attribute name containing the property value to set
      * @see SetPropertyRule
      */
     public void addSetProperty(String pattern, String name, String value) {
@@ -2303,7 +2273,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "set top" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the parent element
      * @see SetTopRule
      */
@@ -2318,12 +2288,12 @@ public class Digester extends DefaultHandler2 {
     /**
      * Add a "set top" rule for the specified parameters.
      *
-     * @param pattern Element matching pattern
+     * @param pattern    Element matching pattern
      * @param methodName Method name to call on the parent element
-     * @param paramType Java class name of the expected parameter type
-     *  (if you wish to use a primitive type, specify the corresponding
-     *  Java wrapper class instead, such as <code>java.lang.Boolean</code>
-     *  for a <code>boolean</code> parameter)
+     * @param paramType  Java class name of the expected parameter type
+     *                   (if you wish to use a primitive type, specify the corresponding
+     *                   Java wrapper class instead, such as <code>java.lang.Boolean</code>
+     *                   for a <code>boolean</code> parameter)
      * @see SetTopRule
      */
     public void addSetTop(String pattern, String methodName,
@@ -2342,7 +2312,7 @@ public class Digester extends DefaultHandler2 {
      * Clear the current contents of the object stack.
      * <p>
      * Calling this method <i>might</i> allow another document of the same type
-     * to be correctly parsed. However this method was not intended for this 
+     * to be correctly parsed. However this method was not intended for this
      * purpose. In general, a separate Digester object should be created for
      * each document to be parsed.
      */
@@ -2356,10 +2326,10 @@ public class Digester extends DefaultHandler2 {
         log = null;
         saxLog = null;
         configured = false;
-        
+
     }
 
-    
+
     public void reset() {
         root = null;
         setErrorHandler(null);
@@ -2389,7 +2359,7 @@ public class Digester extends DefaultHandler2 {
      * is out of range, return <code>null</code>.
      *
      * @param n Index of the desired element, where 0 is the top of the stack,
-     *  1 is the next element down, and so on.
+     *          1 is the next element down, and so on.
      */
     public Object peek(int n) {
 
@@ -2436,10 +2406,9 @@ public class Digester extends DefaultHandler2 {
     /**
      * Pushes the given object onto the stack with the given name.
      * If no stack already exists with the given name then one will be created.
-     * 
-     * @param stackName the name of the stack onto which the object should be pushed
-     * @param value the Object to be pushed onto the named stack.
      *
+     * @param stackName the name of the stack onto which the object should be pushed
+     * @param value     the Object to be pushed onto the named stack.
      * @since 1.6
      */
     public void push(String stackName, Object value) {
@@ -2453,15 +2422,14 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * <p>Pops (gets and removes) the top object from the stack with the given name.</p>
-     *
+     * <p>
      * <p><strong>Note:</strong> a stack is considered empty
      * if no objects have been pushed onto it yet.</p>
-     * 
+     *
      * @param stackName the name of the stack from which the top value is to be popped
-     * @return the top <code>Object</code> on the stack or or null if the stack is either 
+     * @return the top <code>Object</code> on the stack or or null if the stack is either
      * empty or has not been created yet
      * @throws EmptyStackException if the named stack is empty
-     *
      * @since 1.6
      */
     public Object pop(String stackName) {
@@ -2472,14 +2440,14 @@ public class Digester extends DefaultHandler2 {
                 log.debug("Stack '" + stackName + "' is empty");
             }
             throw new EmptyStackException();
-            
+
         } else {
-        
+
             result = namedStack.pop();
         }
         return result;
     }
-    
+
     /**
      * <p>Gets the top object from the stack with the given name.
      * This method does not remove the object from the stack.
@@ -2488,23 +2456,22 @@ public class Digester extends DefaultHandler2 {
      * if no objects have been pushed onto it yet.</p>
      *
      * @param stackName the name of the stack to be peeked
-     * @return the top <code>Object</code> on the stack or null if the stack is either 
+     * @return the top <code>Object</code> on the stack or null if the stack is either
      * empty or has not been created yet
-     * @throws EmptyStackException if the named stack is empty 
-     *
+     * @throws EmptyStackException if the named stack is empty
      * @since 1.6
      */
     public Object peek(String stackName) {
         Object result = null;
         ArrayStack<Object> namedStack = stacksByName.get(stackName);
-        if (namedStack == null ) {
+        if (namedStack == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Stack '" + stackName + "' is empty");
-            }        
+            }
             throw new EmptyStackException();
-        
+
         } else {
-        
+
             result = namedStack.peek();
         }
         return result;
@@ -2514,33 +2481,33 @@ public class Digester extends DefaultHandler2 {
      * <p>Is the stack with the given name empty?</p>
      * <p><strong>Note:</strong> a stack is considered empty
      * if no objects have been pushed onto it yet.</p>
-     * @param stackName the name of the stack whose emptiness 
-     * should be evaluated
-     * @return true if the given stack if empty 
      *
+     * @param stackName the name of the stack whose emptiness
+     *                  should be evaluated
+     * @return true if the given stack if empty
      * @since 1.6
      */
     public boolean isEmpty(String stackName) {
         boolean result = true;
         ArrayStack<Object> namedStack = stacksByName.get(stackName);
-        if (namedStack != null ) {
+        if (namedStack != null) {
             result = namedStack.isEmpty();
         }
         return result;
     }
-    
+
     /**
-     * When the Digester is being used as a SAXContentHandler, 
+     * When the Digester is being used as a SAXContentHandler,
      * this method allows you to access the root object that has been
      * created after parsing.
-     * 
+     *
      * @return the root object that has been created after parsing
-     *  or null if the digester has not parsed any XML yet.
+     * or null if the digester has not parsed any XML yet.
      */
     public Object getRoot() {
         return root;
     }
-    
+
 
     // ------------------------------------------------ Parameter Stack Methods
 
@@ -2554,11 +2521,11 @@ public class Digester extends DefaultHandler2 {
      * instance.  The default implementation does nothing, but subclasses
      * can override as needed.
      * </p>
-     *
+     * <p>
      * <p>
      * <strong>Note</strong> This method may be called more than once.
      * Once only initialization code should be placed in {@link #initialize}
-     * or the code should take responsibility by checking and setting the 
+     * or the code should take responsibility by checking and setting the
      * {@link #configured} flag.
      * </p>
      */
@@ -2580,19 +2547,19 @@ public class Digester extends DefaultHandler2 {
         configured = true;
 
     }
-    
+
     /**
      * <p>
      * Provides a hook for lazy initialization of this <code>Digester</code>
-     * instance.  
+     * instance.
      * The default implementation does nothing, but subclasses
      * can override as needed.
      * Digester (by default) only calls this method once.
      * </p>
-     *
      * <p>
-     * <strong>Note</strong> This method will be called by {@link #configure} 
-     * only when the {@link #configured} flag is false. 
+     * <p>
+     * <strong>Note</strong> This method will be called by {@link #configure}
+     * only when the {@link #configured} flag is false.
      * Subclasses that override <code>configure</code> or who set <code>configured</code>
      * may find that this method may be called more than once.
      * </p>
@@ -2604,7 +2571,7 @@ public class Digester extends DefaultHandler2 {
         // Perform lazy initialization as needed
         // Nothing required by default
 
-    }    
+    }
 
     // -------------------------------------------------------- Package Methods
 
@@ -2612,7 +2579,7 @@ public class Digester extends DefaultHandler2 {
     /**
      * Return the set of DTD URL registrations, keyed by public identifier.
      */
-    Map<String,String> getRegistrations() {
+    Map<String, String> getRegistrations() {
 
         return (entityValidator);
 
@@ -2622,8 +2589,8 @@ public class Digester extends DefaultHandler2 {
     /**
      * <p>Return the top object on the parameters stack without removing it.  If there are
      * no objects on the stack, return <code>null</code>.</p>
-     *
-     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters. 
+     * <p>
+     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters.
      * See {@link #params}.</p>
      */
     public Object peekParams() {
@@ -2642,12 +2609,12 @@ public class Digester extends DefaultHandler2 {
      * <p>Return the n'th object down the parameters stack, where 0 is the top element
      * and [getCount()-1] is the bottom element.  If the specified index
      * is out of range, return <code>null</code>.</p>
-     *
-     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters. 
+     * <p>
+     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters.
      * See {@link #params}.</p>
      *
      * @param n Index of the desired element, where 0 is the top of the stack,
-     *  1 is the next element down, and so on.
+     *          1 is the next element down, and so on.
      */
     public Object peekParams(int n) {
 
@@ -2664,8 +2631,8 @@ public class Digester extends DefaultHandler2 {
     /**
      * <p>Pop the top object off of the parameters stack, and return it.  If there are
      * no objects on the stack, return <code>null</code>.</p>
-     *
-     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters. 
+     * <p>
+     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters.
      * See {@link #params}.</p>
      */
     public Object popParams() {
@@ -2685,8 +2652,8 @@ public class Digester extends DefaultHandler2 {
 
     /**
      * <p>Push a new object onto the top of the parameters stack.</p>
-     *
-     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters. 
+     * <p>
+     * <p>The parameters stack is used to store <code>CallMethodRule</code> parameters.
      * See {@link #params}.</p>
      *
      * @param object The new object
@@ -2707,7 +2674,7 @@ public class Digester extends DefaultHandler2 {
      */
     public SAXException createSAXException(String message, Exception e) {
         if ((e != null) &&
-            (e instanceof InvocationTargetException)) {
+                (e instanceof InvocationTargetException)) {
             Throwable t = e.getCause();
             if (t instanceof ThreadDeath) {
                 throw (ThreadDeath) t;
@@ -2767,12 +2734,12 @@ public class Digester extends DefaultHandler2 {
     public SAXException createSAXException(String message) {
         return createSAXException(message, null);
     }
-    
+
 
     // ------------------------------------------------------- Private Methods
 
 
-   /**
+    /**
      * Returns an attributes list which contains all the attributes
      * passed in, with any text of form "${xxx}" in an attribute value
      * replaced by the appropriate value from the system property.
@@ -2782,19 +2749,18 @@ public class Digester extends DefaultHandler2 {
         if (list.getLength() == 0) {
             return list;
         }
-        
+
         AttributesImpl newAttrs = new AttributesImpl(list);
         int nAttributes = newAttrs.getLength();
         for (int i = 0; i < nAttributes; ++i) {
             String value = newAttrs.getValue(i);
             try {
-                String newValue = 
-                    IntrospectionUtils.replaceProperties(value, null, source);
+                String newValue =
+                        IntrospectionUtils.replaceProperties(value, null, source);
                 if (value != newValue) {
                     newAttrs.setValue(i, newValue);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.warn("Attribute [" + newAttrs.getLocalName(i) + "] failed to update and remains [" + value + "].", e);
             }
         }
@@ -2814,11 +2780,11 @@ public class Digester extends DefaultHandler2 {
         String out;
         try {
             out = IntrospectionUtils.replaceProperties(in, null, source);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return bodyText; // return unchanged data
         }
 
-        if (out == in)  {
+        if (out == in) {
             // No substitutions required. Don't waste memory creating
             // a new buffer
             return bodyText;

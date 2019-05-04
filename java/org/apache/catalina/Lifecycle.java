@@ -201,12 +201,12 @@ public interface Lifecycle {
      * initialization required post object creation. The following
      * {@link LifecycleEvent}s will be fired in the following order:
      * <ol>
-     *   <li>INIT_EVENT: On the successful completion of component
-     *                   initialization.</li>
+     * <li>INIT_EVENT: On the successful completion of component
+     * initialization.</li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void init() throws LifecycleException;
 
@@ -218,23 +218,23 @@ public interface Lifecycle {
      * utilized. The following {@link LifecycleEvent}s will be fired in the
      * following order:
      * <ol>
-     *   <li>BEFORE_START_EVENT: At the beginning of the method. It is as this
-     *                           point the state transitions to
-     *                           {@link LifecycleState#STARTING_PREP}.</li>
-     *   <li>START_EVENT: During the method once it is safe to call start() for
-     *                    any child components. It is at this point that the
-     *                    state transitions to {@link LifecycleState#STARTING}
-     *                    and that the public methods other than property
-     *                    getters/setters and life cycle methods may be
-     *                    used.</li>
-     *   <li>AFTER_START_EVENT: At the end of the method, immediately before it
-     *                          returns. It is at this point that the state
-     *                          transitions to {@link LifecycleState#STARTED}.
-     *                          </li>
+     * <li>BEFORE_START_EVENT: At the beginning of the method. It is as this
+     * point the state transitions to
+     * {@link LifecycleState#STARTING_PREP}.</li>
+     * <li>START_EVENT: During the method once it is safe to call start() for
+     * any child components. It is at this point that the
+     * state transitions to {@link LifecycleState#STARTING}
+     * and that the public methods other than property
+     * getters/setters and life cycle methods may be
+     * used.</li>
+     * <li>AFTER_START_EVENT: At the end of the method, immediately before it
+     * returns. It is at this point that the state
+     * transitions to {@link LifecycleState#STARTED}.
+     * </li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void start() throws LifecycleException;
 
@@ -246,29 +246,29 @@ public interface Lifecycle {
      * getters/setters and life cycle methods should not be used. The following
      * {@link LifecycleEvent}s will be fired in the following order:
      * <ol>
-     *   <li>BEFORE_STOP_EVENT: At the beginning of the method. It is at this
-     *                          point that the state transitions to
-     *                          {@link LifecycleState#STOPPING_PREP}.</li>
-     *   <li>STOP_EVENT: During the method once it is safe to call stop() for
-     *                   any child components. It is at this point that the
-     *                   state transitions to {@link LifecycleState#STOPPING}
-     *                   and that the public methods other than property
-     *                   getters/setters and life cycle methods may no longer be
-     *                   used.</li>
-     *   <li>AFTER_STOP_EVENT: At the end of the method, immediately before it
-     *                         returns. It is at this point that the state
-     *                         transitions to {@link LifecycleState#STOPPED}.
-     *                         </li>
+     * <li>BEFORE_STOP_EVENT: At the beginning of the method. It is at this
+     * point that the state transitions to
+     * {@link LifecycleState#STOPPING_PREP}.</li>
+     * <li>STOP_EVENT: During the method once it is safe to call stop() for
+     * any child components. It is at this point that the
+     * state transitions to {@link LifecycleState#STOPPING}
+     * and that the public methods other than property
+     * getters/setters and life cycle methods may no longer be
+     * used.</li>
+     * <li>AFTER_STOP_EVENT: At the end of the method, immediately before it
+     * returns. It is at this point that the state
+     * transitions to {@link LifecycleState#STOPPED}.
+     * </li>
      * </ol>
-     *
+     * <p>
      * Note that if transitioning from {@link LifecycleState#FAILED} then the
      * three events above will be fired but the component will transition
      * directly from {@link LifecycleState#FAILED} to
      * {@link LifecycleState#STOPPING}, bypassing
      * {@link LifecycleState#STOPPING_PREP}
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that needs to be reported
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that needs to be reported
      */
     public void stop() throws LifecycleException;
 
@@ -276,12 +276,12 @@ public interface Lifecycle {
      * Prepare to discard the object. The following {@link LifecycleEvent}s will
      * be fired in the following order:
      * <ol>
-     *   <li>DESTROY_EVENT: On the successful completion of component
-     *                      destruction.</li>
+     * <li>DESTROY_EVENT: On the successful completion of component
+     * destruction.</li>
      * </ol>
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     public void destroy() throws LifecycleException;
 

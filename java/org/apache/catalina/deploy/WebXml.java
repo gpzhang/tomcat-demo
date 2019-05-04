@@ -18,33 +18,19 @@
 
 package org.apache.catalina.deploy;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.ServletContext;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspPropertyGroupDescriptor;
-import javax.servlet.descriptor.TaglibDescriptor;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.core.ApplicationJspPropertyGroupDescriptor;
 import org.apache.catalina.core.ApplicationTaglibDescriptor;
 import org.apache.tomcat.util.descriptor.XmlIdentifiers;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.servlet.*;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
+import java.net.URL;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Representation of common elements of web.xml and web-fragment.xml. Provides
@@ -57,21 +43,23 @@ import org.apache.tomcat.util.res.StringManager;
 public class WebXml {
 
     protected static final String ORDER_OTHERS =
-        "org.apache.catalina.order.others";
+            "org.apache.catalina.order.others";
 
     private static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
-    private static final org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog(WebXml.class);
+    private static final org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(WebXml.class);
 
     // Global defaults are overridable but Servlets and Servlet mappings need to
     // be unique. Duplicates normally trigger an error. This flag indicates if
     // newly added Servlet elements are marked as overridable.
     private boolean overridable = false;
+
     public boolean isOverridable() {
         return overridable;
     }
+
     public void setOverridable(boolean overridable) {
         this.overridable = overridable;
     }
@@ -82,9 +70,11 @@ public class WebXml {
      * 2.c) varies depending on the ordering method used.
      */
     private boolean duplicated = false;
+
     public boolean isDuplicated() {
         return duplicated;
     }
+
     public void setDuplicated(boolean duplicated) {
         this.duplicated = duplicated;
     }
@@ -92,19 +82,23 @@ public class WebXml {
     // web.xml only elements
     // Absolute Ordering
     private Set<String> absoluteOrdering = null;
+
     public void createAbsoluteOrdering() {
         if (absoluteOrdering == null) {
             absoluteOrdering = new LinkedHashSet<String>();
         }
     }
+
     public void addAbsoluteOrdering(String fragmentName) {
         createAbsoluteOrdering();
         absoluteOrdering.add(fragmentName);
     }
+
     public void addAbsoluteOrderingOthers() {
         createAbsoluteOrdering();
         absoluteOrdering.add(ORDER_OTHERS);
     }
+
     public Set<String> getAbsoluteOrdering() {
         return absoluteOrdering;
     }
@@ -112,9 +106,11 @@ public class WebXml {
     // web-fragment.xml only elements
     // Relative ordering
     private Set<String> after = new LinkedHashSet<String>();
+
     public void addAfterOrdering(String fragmentName) {
         after.add(fragmentName);
     }
+
     public void addAfterOrderingOthers() {
         if (before.contains(ORDER_OTHERS)) {
             throw new IllegalArgumentException(sm.getString(
@@ -122,12 +118,17 @@ public class WebXml {
         }
         after.add(ORDER_OTHERS);
     }
-    public Set<String> getAfterOrdering() { return after; }
+
+    public Set<String> getAfterOrdering() {
+        return after;
+    }
 
     private Set<String> before = new LinkedHashSet<String>();
+
     public void addBeforeOrdering(String fragmentName) {
         before.add(fragmentName);
     }
+
     public void addBeforeOrderingOthers() {
         if (after.contains(ORDER_OTHERS)) {
             throw new IllegalArgumentException(sm.getString(
@@ -135,7 +136,10 @@ public class WebXml {
         }
         before.add(ORDER_OTHERS);
     }
-    public Set<String> getBeforeOrdering() { return before; }
+
+    public Set<String> getBeforeOrdering() {
+        return before;
+    }
 
     // Common elements and attributes
 
@@ -147,9 +151,11 @@ public class WebXml {
         sb.append(minorVersion);
         return sb.toString();
     }
+
     /**
      * Set the version for this web.xml file
-     * @param version   Values of <code>null</code> will be ignored
+     *
+     * @param version Values of <code>null</code> will be ignored
      */
     public void setVersion(String version) {
         if (version == null) {
@@ -172,7 +178,11 @@ public class WebXml {
 
     // Optional publicId attribute
     private String publicId = null;
-    public String getPublicId() { return publicId; }
+
+    public String getPublicId() {
+        return publicId;
+    }
+
     public void setPublicId(String publicId) {
         // Update major and minor version
         if (publicId == null) {
@@ -193,13 +203,22 @@ public class WebXml {
 
     // Optional metadata-complete attribute
     private boolean metadataComplete = false;
-    public boolean isMetadataComplete() { return metadataComplete; }
+
+    public boolean isMetadataComplete() {
+        return metadataComplete;
+    }
+
     public void setMetadataComplete(boolean metadataComplete) {
-        this.metadataComplete = metadataComplete; }
+        this.metadataComplete = metadataComplete;
+    }
 
     // Optional name element
     private String name = null;
-    public String getName() { return name; }
+
+    public String getName() {
+        return name;
+    }
+
     public void setName(String name) {
         if (ORDER_OTHERS.equalsIgnoreCase(name)) {
             // This is unusual. This name will be ignored. Log the fact.
@@ -213,8 +232,14 @@ public class WebXml {
     // Default to 3.0 until we know otherwise
     private int majorVersion = 3;
     private int minorVersion = 0;
-    public int getMajorVersion() { return majorVersion; }
-    public int getMinorVersion() { return minorVersion; }
+
+    public int getMajorVersion() {
+        return majorVersion;
+    }
+
+    public int getMinorVersion() {
+        return minorVersion;
+    }
 
     // web-app elements
     // TODO: Ignored elements:
@@ -223,33 +248,46 @@ public class WebXml {
 
     // display-name - TODO should support multiple with language
     private String displayName = null;
-    public String getDisplayName() { return displayName; }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     // distributable
     private boolean distributable = false;
-    public boolean isDistributable() { return distributable; }
+
+    public boolean isDistributable() {
+        return distributable;
+    }
+
     public void setDistributable(boolean distributable) {
         this.distributable = distributable;
     }
 
     // context-param
     // TODO: description (multiple with language) is ignored
-    private Map<String,String> contextParams = new HashMap<String,String>();
+    private Map<String, String> contextParams = new HashMap<String, String>();
+
     public void addContextParam(String param, String value) {
         contextParams.put(param, value);
     }
-    public Map<String,String> getContextParams() { return contextParams; }
+
+    public Map<String, String> getContextParams() {
+        return contextParams;
+    }
 
     // filter
     // TODO: Should support multiple description elements with language
     // TODO: Should support multiple display-name elements with language
     // TODO: Should support multiple icon elements
     // TODO: Description for init-param is ignored
-    private Map<String,FilterDef> filters =
-        new LinkedHashMap<String,FilterDef>();
+    private Map<String, FilterDef> filters =
+            new LinkedHashMap<String, FilterDef>();
+
     public void addFilter(FilterDef filter) {
         if (filters.containsKey(filter.getFilterName())) {
             // Filter names must be unique within a web(-fragment).xml
@@ -259,26 +297,37 @@ public class WebXml {
         }
         filters.put(filter.getFilterName(), filter);
     }
-    public Map<String,FilterDef> getFilters() { return filters; }
+
+    public Map<String, FilterDef> getFilters() {
+        return filters;
+    }
 
     // filter-mapping
     private Set<FilterMap> filterMaps = new LinkedHashSet<FilterMap>();
     private Set<String> filterMappingNames = new HashSet<String>();
+
     public void addFilterMapping(FilterMap filterMap) {
         filterMaps.add(filterMap);
         filterMappingNames.add(filterMap.getFilterName());
     }
-    public Set<FilterMap> getFilterMappings() { return filterMaps; }
+
+    public Set<FilterMap> getFilterMappings() {
+        return filterMaps;
+    }
 
     // listener
     // TODO: description (multiple with language) is ignored
     // TODO: display-name (multiple with language) is ignored
     // TODO: icon (multiple) is ignored
     private Set<String> listeners = new LinkedHashSet<String>();
+
     public void addListener(String className) {
         listeners.add(className);
     }
-    public Set<String> getListeners() { return listeners; }
+
+    public Set<String> getListeners() {
+        return listeners;
+    }
 
     // servlet
     // TODO: description (multiple with language) is ignored
@@ -286,18 +335,23 @@ public class WebXml {
     // TODO: icon (multiple) is ignored
     // TODO: init-param/description (multiple with language) is ignored
     // TODO: security-role-ref/description (multiple with language) is ignored
-    private Map<String,ServletDef> servlets = new HashMap<String,ServletDef>();
+    private Map<String, ServletDef> servlets = new HashMap<String, ServletDef>();
+
     public void addServlet(ServletDef servletDef) {
         servlets.put(servletDef.getServletName(), servletDef);
         if (overridable) {
             servletDef.setOverridable(overridable);
         }
     }
-    public Map<String,ServletDef> getServlets() { return servlets; }
+
+    public Map<String, ServletDef> getServlets() {
+        return servlets;
+    }
 
     // servlet-mapping
-    private Map<String,String> servletMappings = new HashMap<String,String>();
+    private Map<String, String> servletMappings = new HashMap<String, String>();
     private Set<String> servletMappingNames = new HashSet<String>();
+
     public void addServletMapping(String urlPattern, String servletName) {
         String oldServletName = servletMappings.put(urlPattern, servletName);
         if (oldServletName != null) {
@@ -309,26 +363,38 @@ public class WebXml {
         }
         servletMappingNames.add(servletName);
     }
-    public Map<String,String> getServletMappings() { return servletMappings; }
+
+    public Map<String, String> getServletMappings() {
+        return servletMappings;
+    }
 
     // session-config
     // Digester will check there is only one of these
     private SessionConfig sessionConfig = new SessionConfig();
+
     public void setSessionConfig(SessionConfig sessionConfig) {
         this.sessionConfig = sessionConfig;
     }
-    public SessionConfig getSessionConfig() { return sessionConfig; }
+
+    public SessionConfig getSessionConfig() {
+        return sessionConfig;
+    }
 
     // mime-mapping
-    private Map<String,String> mimeMappings = new HashMap<String,String>();
+    private Map<String, String> mimeMappings = new HashMap<String, String>();
+
     public void addMimeMapping(String extension, String mimeType) {
         mimeMappings.put(extension, mimeType);
     }
-    public Map<String,String> getMimeMappings() { return mimeMappings; }
+
+    public Map<String, String> getMimeMappings() {
+        return mimeMappings;
+    }
 
     // welcome-file-list merge control
     private boolean replaceWelcomeFiles = false;
     private boolean alwaysAddWelcomeFiles = true;
+
     /**
      * When merging/parsing web.xml files into this web.xml should the current
      * set be completely replaced?
@@ -336,6 +402,7 @@ public class WebXml {
     public void setReplaceWelcomeFiles(boolean replaceWelcomeFiles) {
         this.replaceWelcomeFiles = replaceWelcomeFiles;
     }
+
     /**
      * When merging from this web.xml, should the welcome files be added to the
      * target web.xml even if it already contains welcome file definitions.
@@ -346,6 +413,7 @@ public class WebXml {
 
     // welcome-file-list
     private Set<String> welcomeFiles = new LinkedHashSet<String>();
+
     public void addWelcomeFile(String welcomeFile) {
         if (replaceWelcomeFiles) {
             welcomeFiles.clear();
@@ -353,18 +421,26 @@ public class WebXml {
         }
         welcomeFiles.add(welcomeFile);
     }
-    public Set<String> getWelcomeFiles() { return welcomeFiles; }
+
+    public Set<String> getWelcomeFiles() {
+        return welcomeFiles;
+    }
 
     // error-page
-    private Map<String,ErrorPage> errorPages = new HashMap<String,ErrorPage>();
+    private Map<String, ErrorPage> errorPages = new HashMap<String, ErrorPage>();
+
     public void addErrorPage(ErrorPage errorPage) {
         errorPages.put(errorPage.getName(), errorPage);
     }
-    public Map<String,ErrorPage> getErrorPages() { return errorPages; }
+
+    public Map<String, ErrorPage> getErrorPages() {
+        return errorPages;
+    }
 
     // Digester will check there is only one jsp-config
     // jsp-config/taglib or taglib (2.3 and earlier)
-    private Map<String,String> taglibs = new HashMap<String,String>();
+    private Map<String, String> taglibs = new HashMap<String, String>();
+
     public void addTaglib(String uri, String location) {
         if (taglibs.containsKey(uri)) {
             // Taglib URIs must be unique within a web(-fragment).xml
@@ -373,14 +449,19 @@ public class WebXml {
         }
         taglibs.put(uri, location);
     }
-    public Map<String,String> getTaglibs() { return taglibs; }
+
+    public Map<String, String> getTaglibs() {
+        return taglibs;
+    }
 
     // jsp-config/jsp-property-group
     private Set<JspPropertyGroup> jspPropertyGroups =
-        new LinkedHashSet<JspPropertyGroup>();
+            new LinkedHashSet<JspPropertyGroup>();
+
     public void addJspPropertyGroup(JspPropertyGroup propertyGroup) {
         jspPropertyGroups.add(propertyGroup);
     }
+
     public Set<JspPropertyGroup> getJspPropertyGroups() {
         return jspPropertyGroups;
     }
@@ -389,10 +470,12 @@ public class WebXml {
     // TODO: Should support multiple display-name elements with language
     // TODO: Should support multiple description elements with language
     private Set<SecurityConstraint> securityConstraints =
-        new HashSet<SecurityConstraint>();
+            new HashSet<SecurityConstraint>();
+
     public void addSecurityConstraint(SecurityConstraint securityConstraint) {
         securityConstraints.add(securityConstraint);
     }
+
     public Set<SecurityConstraint> getSecurityConstraints() {
         return securityConstraints;
     }
@@ -400,23 +483,32 @@ public class WebXml {
     // login-config
     // Digester will check there is only one of these
     private LoginConfig loginConfig = null;
+
     public void setLoginConfig(LoginConfig loginConfig) {
         this.loginConfig = loginConfig;
     }
-    public LoginConfig getLoginConfig() { return loginConfig; }
+
+    public LoginConfig getLoginConfig() {
+        return loginConfig;
+    }
 
     // security-role
     // TODO: description (multiple with language) is ignored
     private Set<String> securityRoles = new HashSet<String>();
+
     public void addSecurityRole(String securityRole) {
         securityRoles.add(securityRole);
     }
-    public Set<String> getSecurityRoles() { return securityRoles; }
+
+    public Set<String> getSecurityRoles() {
+        return securityRoles;
+    }
 
     // env-entry
     // TODO: Should support multiple description elements with language
-    private Map<String,ContextEnvironment> envEntries =
-        new HashMap<String,ContextEnvironment>();
+    private Map<String, ContextEnvironment> envEntries =
+            new HashMap<String, ContextEnvironment>();
+
     public void addEnvEntry(ContextEnvironment envEntry) {
         if (envEntries.containsKey(envEntry.getName())) {
             // env-entry names must be unique within a web(-fragment).xml
@@ -424,26 +516,35 @@ public class WebXml {
                     sm.getString("webXml.duplicateEnvEntry",
                             envEntry.getName()));
         }
-        envEntries.put(envEntry.getName(),envEntry);
+        envEntries.put(envEntry.getName(), envEntry);
     }
-    public Map<String,ContextEnvironment> getEnvEntries() { return envEntries; }
+
+    public Map<String, ContextEnvironment> getEnvEntries() {
+        return envEntries;
+    }
 
     // ejb-ref
     // TODO: Should support multiple description elements with language
-    private Map<String,ContextEjb> ejbRefs = new HashMap<String,ContextEjb>();
+    private Map<String, ContextEjb> ejbRefs = new HashMap<String, ContextEjb>();
+
     public void addEjbRef(ContextEjb ejbRef) {
-        ejbRefs.put(ejbRef.getName(),ejbRef);
+        ejbRefs.put(ejbRef.getName(), ejbRef);
     }
-    public Map<String,ContextEjb> getEjbRefs() { return ejbRefs; }
+
+    public Map<String, ContextEjb> getEjbRefs() {
+        return ejbRefs;
+    }
 
     // ejb-local-ref
     // TODO: Should support multiple description elements with language
-    private Map<String,ContextLocalEjb> ejbLocalRefs =
-        new HashMap<String,ContextLocalEjb>();
+    private Map<String, ContextLocalEjb> ejbLocalRefs =
+            new HashMap<String, ContextLocalEjb>();
+
     public void addEjbLocalRef(ContextLocalEjb ejbLocalRef) {
-        ejbLocalRefs.put(ejbLocalRef.getName(),ejbLocalRef);
+        ejbLocalRefs.put(ejbLocalRef.getName(), ejbLocalRef);
     }
-    public Map<String,ContextLocalEjb> getEjbLocalRefs() {
+
+    public Map<String, ContextLocalEjb> getEjbLocalRefs() {
         return ejbLocalRefs;
     }
 
@@ -451,17 +552,22 @@ public class WebXml {
     // TODO: Should support multiple description elements with language
     // TODO: Should support multiple display-names elements with language
     // TODO: Should support multiple icon elements ???
-    private Map<String,ContextService> serviceRefs =
-        new HashMap<String,ContextService>();
+    private Map<String, ContextService> serviceRefs =
+            new HashMap<String, ContextService>();
+
     public void addServiceRef(ContextService serviceRef) {
         serviceRefs.put(serviceRef.getName(), serviceRef);
     }
-    public Map<String,ContextService> getServiceRefs() { return serviceRefs; }
+
+    public Map<String, ContextService> getServiceRefs() {
+        return serviceRefs;
+    }
 
     // resource-ref
     // TODO: Should support multiple description elements with language
-    private Map<String,ContextResource> resourceRefs =
-        new HashMap<String,ContextResource>();
+    private Map<String, ContextResource> resourceRefs =
+            new HashMap<String, ContextResource>();
+
     public void addResourceRef(ContextResource resourceRef) {
         if (resourceRefs.containsKey(resourceRef.getName())) {
             // resource-ref names must be unique within a web(-fragment).xml
@@ -471,14 +577,16 @@ public class WebXml {
         }
         resourceRefs.put(resourceRef.getName(), resourceRef);
     }
-    public Map<String,ContextResource> getResourceRefs() {
+
+    public Map<String, ContextResource> getResourceRefs() {
         return resourceRefs;
     }
 
     // resource-env-ref
     // TODO: Should support multiple description elements with language
-    private Map<String,ContextResourceEnvRef> resourceEnvRefs =
-        new HashMap<String,ContextResourceEnvRef>();
+    private Map<String, ContextResourceEnvRef> resourceEnvRefs =
+            new HashMap<String, ContextResourceEnvRef>();
+
     public void addResourceEnvRef(ContextResourceEnvRef resourceEnvRef) {
         if (resourceEnvRefs.containsKey(resourceEnvRef.getName())) {
             // resource-env-ref names must be unique within a web(-fragment).xml
@@ -488,14 +596,16 @@ public class WebXml {
         }
         resourceEnvRefs.put(resourceEnvRef.getName(), resourceEnvRef);
     }
-    public Map<String,ContextResourceEnvRef> getResourceEnvRefs() {
+
+    public Map<String, ContextResourceEnvRef> getResourceEnvRefs() {
         return resourceEnvRefs;
     }
 
     // message-destination-ref
     // TODO: Should support multiple description elements with language
-    private Map<String,MessageDestinationRef> messageDestinationRefs =
-        new HashMap<String,MessageDestinationRef>();
+    private Map<String, MessageDestinationRef> messageDestinationRefs =
+            new HashMap<String, MessageDestinationRef>();
+
     public void addMessageDestinationRef(
             MessageDestinationRef messageDestinationRef) {
         if (messageDestinationRefs.containsKey(
@@ -509,7 +619,8 @@ public class WebXml {
         messageDestinationRefs.put(messageDestinationRef.getName(),
                 messageDestinationRef);
     }
-    public Map<String,MessageDestinationRef> getMessageDestinationRefs() {
+
+    public Map<String, MessageDestinationRef> getMessageDestinationRefs() {
         return messageDestinationRefs;
     }
 
@@ -517,8 +628,9 @@ public class WebXml {
     // TODO: Should support multiple description elements with language
     // TODO: Should support multiple display-names elements with language
     // TODO: Should support multiple icon elements ???
-    private Map<String,MessageDestination> messageDestinations =
-        new HashMap<String,MessageDestination>();
+    private Map<String, MessageDestination> messageDestinations =
+            new HashMap<String, MessageDestination>();
+
     public void addMessageDestination(
             MessageDestination messageDestination) {
         if (messageDestinations.containsKey(
@@ -532,28 +644,33 @@ public class WebXml {
         messageDestinations.put(messageDestination.getName(),
                 messageDestination);
     }
-    public Map<String,MessageDestination> getMessageDestinations() {
+
+    public Map<String, MessageDestination> getMessageDestinations() {
         return messageDestinations;
     }
 
     // locale-encoding-mapping-list
-    private Map<String,String> localeEncodingMappings =
-        new HashMap<String,String>();
+    private Map<String, String> localeEncodingMappings =
+            new HashMap<String, String>();
+
     public void addLocaleEncodingMapping(String locale, String encoding) {
         localeEncodingMappings.put(locale, encoding);
     }
-    public Map<String,String> getLocalEncodingMappings() {
+
+    public Map<String, String> getLocalEncodingMappings() {
         return localeEncodingMappings;
     }
 
     // post-construct elements
     private Map<String, String> postConstructMethods =
             new HashMap<String, String>();
+
     public void addPostConstructMethods(String clazz, String method) {
         if (!postConstructMethods.containsKey(clazz)) {
             postConstructMethods.put(clazz, method);
         }
     }
+
     public Map<String, String> getPostConstructMethods() {
         return postConstructMethods;
     }
@@ -561,11 +678,13 @@ public class WebXml {
     // pre-destroy elements
     private Map<String, String> preDestroyMethods =
             new HashMap<String, String>();
+
     public void addPreDestroyMethods(String clazz, String method) {
         if (!preDestroyMethods.containsKey(clazz)) {
             preDestroyMethods.put(clazz, method);
         }
     }
+
     public Map<String, String> getPreDestroyMethods() {
         return preDestroyMethods;
     }
@@ -574,13 +693,25 @@ public class WebXml {
 
     // URL of JAR / exploded JAR for this web-fragment
     private URL uRL = null;
-    public void setURL(URL url) { this.uRL = url; }
-    public URL getURL() { return uRL; }
+
+    public void setURL(URL url) {
+        this.uRL = url;
+    }
+
+    public URL getURL() {
+        return uRL;
+    }
 
     // Name of jar file
     private String jarName = null;
-    public void setJarName(String jarName) { this.jarName = jarName; }
-    public String getJarName() { return jarName; }
+
+    public void setJarName(String jarName) {
+        this.jarName = jarName;
+    }
+
+    public String getJarName() {
+        return jarName;
+    }
 
     @Override
     public String toString() {
@@ -1025,10 +1156,10 @@ public class WebXml {
             sb.append("  <login-config>\n");
             appendElement(sb, INDENT4, "auth-method",
                     loginConfig.getAuthMethod());
-            appendElement(sb,INDENT4, "realm-name",
+            appendElement(sb, INDENT4, "realm-name",
                     loginConfig.getRealmName());
             if (loginConfig.getErrorPage() != null ||
-                        loginConfig.getLoginPage() != null) {
+                    loginConfig.getLoginPage() != null) {
                 sb.append("    <form-login-config>\n");
                 appendElement(sb, INDENT6, "form-login-page",
                         loginConfig.getLoginPage());
@@ -1260,7 +1391,7 @@ public class WebXml {
     }
 
     private static void appendElement(StringBuilder sb, String indent,
-            String elementName, String value) {
+                                      String elementName, String value) {
         if (value == null) {
             return;
         }
@@ -1282,7 +1413,7 @@ public class WebXml {
     }
 
     private static void appendElement(StringBuilder sb, String indent,
-            String elementName, Object value) {
+                                      String elementName, Object value) {
         if (value == null) return;
         appendElement(sb, indent, elementName, value.toString());
     }
@@ -1318,7 +1449,7 @@ public class WebXml {
     /**
      * Configure a {@link Context} using the stored web.xml representation.
      *
-     * @param context   The context to be configured
+     * @param context The context to be configured
      */
     public void configureContext(Context context) {
         // As far as possible, process in alphabetical order so it is easy to
@@ -1357,17 +1488,14 @@ public class WebXml {
             context.addFilterMap(filterMap);
         }
         for (JspPropertyGroup jspPropertyGroup : jspPropertyGroups) {
-            JspPropertyGroupDescriptor descriptor =
-                new ApplicationJspPropertyGroupDescriptor(jspPropertyGroup);
-            context.getJspConfigDescriptor().getJspPropertyGroups().add(
-                    descriptor);
+            JspPropertyGroupDescriptor descriptor = new ApplicationJspPropertyGroupDescriptor(jspPropertyGroup);
+            context.getJspConfigDescriptor().getJspPropertyGroups().add(descriptor);
         }
         for (String listener : listeners) {
             context.addApplicationListener(listener);
         }
         for (Entry<String, String> entry : localeEncodingMappings.entrySet()) {
-            context.addLocaleEncodingMappingParameter(entry.getKey(),
-                    entry.getValue());
+            context.addLocaleEncodingMappingParameter(entry.getKey(), entry.getValue());
         }
         // Prevents IAE
         if (loginConfig != null) {
@@ -1400,6 +1528,7 @@ public class WebXml {
             context.getNamingResources().addService(service);
         }
         for (ServletDef servlet : servlets.values()) {
+            //一个context下一个servlet对应一个Wrapper（具体实现为StandardWrapper）
             Wrapper wrapper = context.createWrapper();
             // Description is ignored
             // Display name is ignored
@@ -1414,36 +1543,36 @@ public class WebXml {
                 wrapper.setEnabled(servlet.getEnabled().booleanValue());
             }
             wrapper.setName(servlet.getServletName());
-            Map<String,String> params = servlet.getParameterMap();
+            Map<String, String> params = servlet.getParameterMap();
             for (Entry<String, String> entry : params.entrySet()) {
                 wrapper.addInitParameter(entry.getKey(), entry.getValue());
             }
             wrapper.setRunAs(servlet.getRunAs());
             Set<SecurityRoleRef> roleRefs = servlet.getSecurityRoleRefs();
             for (SecurityRoleRef roleRef : roleRefs) {
-                wrapper.addSecurityReference(
-                        roleRef.getName(), roleRef.getLink());
+                wrapper.addSecurityReference(roleRef.getName(), roleRef.getLink());
             }
+            /**
+             * 设置具体的servlet 到StandardWrapper的属性servletClass
+             * 后续通过StandardWrapper加载servlet时会用到！！！
+             */
             wrapper.setServletClass(servlet.getServletClass());
             MultipartDef multipartdef = servlet.getMultipartDef();
             if (multipartdef != null) {
                 if (multipartdef.getMaxFileSize() != null &&
-                        multipartdef.getMaxRequestSize()!= null &&
+                        multipartdef.getMaxRequestSize() != null &&
                         multipartdef.getFileSizeThreshold() != null) {
                     wrapper.setMultipartConfigElement(new MultipartConfigElement(
                             multipartdef.getLocation(),
                             Long.parseLong(multipartdef.getMaxFileSize()),
                             Long.parseLong(multipartdef.getMaxRequestSize()),
-                            Integer.parseInt(
-                                    multipartdef.getFileSizeThreshold())));
+                            Integer.parseInt(multipartdef.getFileSizeThreshold())));
                 } else {
-                    wrapper.setMultipartConfigElement(new MultipartConfigElement(
-                            multipartdef.getLocation()));
+                    wrapper.setMultipartConfigElement(new MultipartConfigElement(multipartdef.getLocation()));
                 }
             }
             if (servlet.getAsyncSupported() != null) {
-                wrapper.setAsyncSupported(
-                        servlet.getAsyncSupported().booleanValue());
+                wrapper.setAsyncSupported(servlet.getAsyncSupported().booleanValue());
             }
             wrapper.setOverridable(servlet.isOverridable());
             context.addChild(wrapper);
@@ -1453,11 +1582,9 @@ public class WebXml {
         }
         if (sessionConfig != null) {
             if (sessionConfig.getSessionTimeout() != null) {
-                context.setSessionTimeout(
-                        sessionConfig.getSessionTimeout().intValue());
+                context.setSessionTimeout(sessionConfig.getSessionTimeout().intValue());
             }
-            SessionCookieConfig scc =
-                context.getServletContext().getSessionCookieConfig();
+            SessionCookieConfig scc = context.getServletContext().getSessionCookieConfig();
             scc.setName(sessionConfig.getCookieName());
             scc.setDomain(sessionConfig.getCookieDomain());
             scc.setPath(sessionConfig.getCookiePath());
@@ -1472,13 +1599,11 @@ public class WebXml {
                 scc.setMaxAge(sessionConfig.getCookieMaxAge().intValue());
             }
             if (sessionConfig.getSessionTrackingModes().size() > 0) {
-                context.getServletContext().setSessionTrackingModes(
-                        sessionConfig.getSessionTrackingModes());
+                context.getServletContext().setSessionTrackingModes(sessionConfig.getSessionTrackingModes());
             }
         }
         for (Entry<String, String> entry : taglibs.entrySet()) {
-            TaglibDescriptor descriptor = new ApplicationTaglibDescriptor(
-                    entry.getValue(), entry.getKey());
+            TaglibDescriptor descriptor = new ApplicationTaglibDescriptor(entry.getValue(), entry.getKey());
             context.getJspConfigDescriptor().getTaglibs().add(descriptor);
         }
 
@@ -1508,10 +1633,9 @@ public class WebXml {
                     context.addServletMapping(urlPattern, jspServletName, true);
                 }
             } else {
-                if(log.isDebugEnabled()) {
+                if (log.isDebugEnabled()) {
                     for (String urlPattern : jspPropertyGroup.getUrlPatterns()) {
-                        log.debug("Skiping " + urlPattern + " , no servlet " +
-                                jspServletName);
+                        log.debug("Skiping " + urlPattern + " , no servlet " + jspServletName);
                     }
                 }
             }
@@ -1529,9 +1653,9 @@ public class WebXml {
     /**
      * Merge the supplied web fragments into this main web.xml.
      *
-     * @param fragments     The fragments to merge in
+     * @param fragments The fragments to merge in
      * @return <code>true</code> if merge is successful, else
-     *         <code>false</code>
+     * <code>false</code>
      */
     public boolean merge(Set<WebXml> fragments) {
         // As far as possible, process in alphabetical order so it is easy to
@@ -1625,15 +1749,13 @@ public class WebXml {
         }
 
         for (WebXml fragment : fragments) {
-            for (Map.Entry<String,FilterDef> entry :
+            for (Map.Entry<String, FilterDef> entry :
                     fragment.getFilters().entrySet()) {
                 if (filters.containsKey(entry.getKey())) {
-                    mergeFilter(entry.getValue(),
-                            filters.get(entry.getKey()), false);
+                    mergeFilter(entry.getValue(), filters.get(entry.getKey()), false);
                 } else {
                     if (temp.getFilters().containsKey(entry.getKey())) {
-                        if (!(mergeFilter(entry.getValue(),
-                                temp.getFilters().get(entry.getKey()), true))) {
+                        if (!(mergeFilter(entry.getValue(), temp.getFilters().get(entry.getKey()), true))) {
                             log.error(sm.getString(
                                     "webXml.mergeConflictFilter",
                                     entry.getKey(),
@@ -1679,8 +1801,7 @@ public class WebXml {
             for (WebXml fragment : fragments) {
                 LoginConfig fragmentLoginConfig = fragment.loginConfig;
                 if (fragmentLoginConfig != null) {
-                    if (tempLoginConfig == null ||
-                            fragmentLoginConfig.equals(tempLoginConfig)) {
+                    if (tempLoginConfig == null || fragmentLoginConfig.equals(tempLoginConfig)) {
                         tempLoginConfig = fragmentLoginConfig;
                     } else {
                         log.error(sm.getString(
@@ -1760,10 +1881,9 @@ public class WebXml {
         // fragments override those in annotations
         // Skip servlet definitions and mappings from fragments that are
         // defined in web.xml
-        List<Map.Entry<String,String>> servletMappingsToAdd =
-            new ArrayList<Map.Entry<String,String>>();
+        List<Map.Entry<String, String>> servletMappingsToAdd = new ArrayList<Map.Entry<String, String>>();
         for (WebXml fragment : fragments) {
-            for (Map.Entry<String,String> servletMap :
+            for (Map.Entry<String, String> servletMap :
                     fragment.getServletMappings().entrySet()) {
                 if (!servletMappingNames.contains(servletMap.getValue()) &&
                         !servletMappings.containsKey(servletMap.getKey())) {
@@ -1773,12 +1893,12 @@ public class WebXml {
         }
 
         // Add fragment mappings
-        for (Map.Entry<String,String> mapping : servletMappingsToAdd) {
+        for (Map.Entry<String, String> mapping : servletMappingsToAdd) {
             addServletMapping(mapping.getKey(), mapping.getValue());
         }
 
         for (WebXml fragment : fragments) {
-            for (Map.Entry<String,ServletDef> entry :
+            for (Map.Entry<String, ServletDef> entry :
                     fragment.getServlets().entrySet()) {
                 if (servlets.containsKey(entry.getKey())) {
                     mergeServlet(entry.getValue(),
@@ -1984,7 +2104,7 @@ public class WebXml {
         if (sessionConfig.getSessionTrackingModes().size() == 0) {
             for (WebXml fragment : fragments) {
                 EnumSet<SessionTrackingMode> value =
-                    fragment.getSessionConfig().getSessionTrackingModes();
+                        fragment.getSessionConfig().getSessionTrackingModes();
                 if (value.size() > 0) {
                     if (temp.getSessionConfig().getSessionTrackingModes().size() == 0) {
                         temp.getSessionConfig().getSessionTrackingModes().addAll(value);
@@ -2073,9 +2193,9 @@ public class WebXml {
         return true;
     }
 
-    private static <T> boolean mergeMap(Map<String,T> fragmentMap,
-            Map<String,T> mainMap, Map<String,T> tempMap, WebXml fragment,
-            String mapName) {
+    private static <T> boolean mergeMap(Map<String, T> fragmentMap,
+                                        Map<String, T> mainMap, Map<String, T> tempMap, WebXml fragment,
+                                        String mapName) {
         for (Entry<String, T> entry : fragmentMap.entrySet()) {
             final String key = entry.getKey();
             if (!mainMap.containsKey(key)) {
@@ -2101,7 +2221,7 @@ public class WebXml {
     }
 
     private static boolean mergeFilter(FilterDef src, FilterDef dest,
-            boolean failOnConflict) {
+                                       boolean failOnConflict) {
         if (dest.getAsyncSupported() == null) {
             dest.setAsyncSupported(src.getAsyncSupported());
         } else if (src.getAsyncSupported() != null) {
@@ -2111,7 +2231,7 @@ public class WebXml {
             }
         }
 
-        if (dest.getFilterClass()  == null) {
+        if (dest.getFilterClass() == null) {
             dest.setFilterClass(src.getFilterClass());
         } else if (src.getFilterClass() != null) {
             if (failOnConflict &&
@@ -2120,7 +2240,7 @@ public class WebXml {
             }
         }
 
-        for (Map.Entry<String,String> srcEntry :
+        for (Map.Entry<String, String> srcEntry :
                 src.getParameterMap().entrySet()) {
             if (dest.getParameterMap().containsKey(srcEntry.getKey())) {
                 if (failOnConflict && !dest.getParameterMap().get(
@@ -2135,7 +2255,7 @@ public class WebXml {
     }
 
     private static boolean mergeServlet(ServletDef src, ServletDef dest,
-            boolean failOnConflict) {
+                                        boolean failOnConflict) {
         // These tests should be unnecessary...
         if (dest.getServletClass() != null && dest.getJspFile() != null) {
             return false;
@@ -2188,7 +2308,7 @@ public class WebXml {
             }
         }
 
-        for (Map.Entry<String,String> srcEntry :
+        for (Map.Entry<String, String> srcEntry :
                 src.getParameterMap().entrySet()) {
             if (dest.getParameterMap().containsKey(srcEntry.getKey())) {
                 if (failOnConflict && !dest.getParameterMap().get(
@@ -2222,7 +2342,7 @@ public class WebXml {
     }
 
     private static boolean mergeMultipartDef(MultipartDef src, MultipartDef dest,
-            boolean failOnConflict) {
+                                             boolean failOnConflict) {
 
         if (dest.getLocation() == null) {
             dest.setLocation(src.getLocation());
@@ -2298,12 +2418,12 @@ public class WebXml {
      * @return Ordered list of web-fragment.xml files to process
      */
     public static Set<WebXml> orderWebFragments(WebXml application,
-            Map<String,WebXml> fragments, ServletContext servletContext) {
+                                                Map<String, WebXml> fragments, ServletContext servletContext) {
 
         Set<WebXml> orderedFragments = new LinkedHashSet<WebXml>();
 
         boolean absoluteOrdering =
-            (application.getAbsoluteOrdering() != null);
+                (application.getAbsoluteOrdering() != null);
         boolean orderingPresent = false;
 
         if (absoluteOrdering) {
@@ -2327,7 +2447,7 @@ public class WebXml {
                     if (fragment != null) {
                         orderedFragments.add(fragment);
                     } else {
-                        log.warn(sm.getString("webXml.wrongFragmentName",requestedName));
+                        log.warn(sm.getString("webXml.wrongFragmentName", requestedName));
                     }
                 }
             }
@@ -2424,7 +2544,7 @@ public class WebXml {
             List<String> orderedJarFileNames = null;
             if (orderingPresent) {
                 orderedJarFileNames = new ArrayList<String>();
-                for (WebXml fragment: orderedFragments) {
+                for (WebXml fragment : orderedFragments) {
                     orderedJarFileNames.add(fragment.getJarName());
                 }
             }
@@ -2450,8 +2570,9 @@ public class WebXml {
             }
         }
     }
+
     private static void orderFragments(Set<WebXml> orderedFragments,
-            Set<WebXml> unordered) {
+                                       Set<WebXml> unordered) {
         Set<WebXml> addedThisRound = new HashSet<WebXml>();
         Set<WebXml> addedLastRound = new HashSet<WebXml>();
         while (unordered.size() > 0) {
@@ -2479,7 +2600,7 @@ public class WebXml {
     }
 
     private static void makeBeforeOthersExplicit(Set<String> beforeOrdering,
-            Map<String, WebXml> fragments) {
+                                                 Map<String, WebXml> fragments) {
         for (String before : beforeOrdering) {
             if (!before.equals(ORDER_OTHERS)) {
                 WebXml webXml = fragments.get(before);
@@ -2492,7 +2613,7 @@ public class WebXml {
     }
 
     private static void makeAfterOthersExplicit(Set<String> afterOrdering,
-            Map<String, WebXml> fragments) {
+                                                Map<String, WebXml> fragments) {
         for (String after : afterOrdering) {
             if (!after.equals(ORDER_OTHERS)) {
                 WebXml webXml = fragments.get(after);

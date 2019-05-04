@@ -19,10 +19,9 @@
 package org.apache.catalina.core;
 
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
+import java.util.Enumeration;
 
 
 /**
@@ -31,7 +30,7 @@ import javax.servlet.ServletContext;
  * @author Remy Maucherat
  */
 public final class StandardWrapperFacade
-    implements ServletConfig {
+        implements ServletConfig {
 
 
     // ----------------------------------------------------------- Constructors

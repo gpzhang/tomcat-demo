@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
  * Abstract the protocol implementation, including threading, etc.
  * Processor is single threaded and specific to stream-based protocols,
  * will not fit Jk protocols like JNI.
- *
+ * <p>
  * This is the main interface to be implemented by a coyote connector.
  * Adapter is the main interface to be implemented by a coyote servlet
  * container.
@@ -39,6 +39,7 @@ public interface ProtocolHandler {
      * The adapter, used to call the connector.
      */
     public void setAdapter(Adapter adapter);
+
     public Adapter getAdapter();
 
 

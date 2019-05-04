@@ -106,8 +106,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Craig R. McClanahan
  */
-public abstract class ContainerBase extends LifecycleMBeanBase
-        implements Container {
+public abstract class ContainerBase extends LifecycleMBeanBase implements Container {
 
     private static final org.apache.juli.logging.Log log =
             org.apache.juli.logging.LogFactory.getLog(ContainerBase.class);
@@ -118,8 +117,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
      * this allows the XML parser to have fewer privileges than
      * Tomcat.
      */
-    protected class PrivilegedAddChild
-            implements PrivilegedAction<Void> {
+    protected class PrivilegedAddChild implements PrivilegedAction<Void> {
 
         private Container child;
 
@@ -142,8 +140,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     /**
      * The child Containers belonging to this Container, keyed by name.
      */
-    protected HashMap<String, Container> children =
-            new HashMap<String, Container>();
+    protected HashMap<String, Container> children = new HashMap<String, Container>();
 
 
     /**
@@ -158,8 +155,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
      * themselves or other listeners and with a ReadWriteLock that would trigger
      * a deadlock.
      */
-    protected List<ContainerListener> listeners =
-            new CopyOnWriteArrayList<ContainerListener>();
+    protected List<ContainerListener> listeners = new CopyOnWriteArrayList<ContainerListener>();
 
     /**
      * The Loader implementation with which this Container is associated.
@@ -239,8 +235,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     /**
@@ -417,8 +412,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             this.loader = loader;
 
             // Stop the old component if necessary
-            if (getState().isAvailable() && (oldLoader != null) &&
-                    (oldLoader instanceof Lifecycle)) {
+            if (getState().isAvailable() && (oldLoader != null) && (oldLoader instanceof Lifecycle)) {
                 try {
                     ((Lifecycle) oldLoader).stop();
                 } catch (LifecycleException e) {
@@ -432,6 +426,10 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             if (getState().isAvailable() && (loader != null) &&
                     (loader instanceof Lifecycle)) {
                 try {
+                    /**
+                     * 子类WebappLoader执行继承父类LifecycleBase的start方法
+                     * start方法内部调用子类重写的方法startInternal();
+                     */
                     ((Lifecycle) loader).start();
                 } catch (LifecycleException e) {
                     log.error("ContainerBase.setLoader: start: ", e);
@@ -609,8 +607,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             this.cluster = cluster;
 
             // Stop the old component if necessary
-            if (getState().isAvailable() && (oldCluster != null) &&
-                    (oldCluster instanceof Lifecycle)) {
+            if (getState().isAvailable() && (oldCluster != null) && (oldCluster instanceof Lifecycle)) {
                 try {
                     ((Lifecycle) oldCluster).stop();
                 } catch (LifecycleException e) {
@@ -958,23 +955,27 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     @Override
     public void addChild(Container child) {
         if (Globals.IS_SECURITY_ENABLED) {
-            PrivilegedAction<Void> dp =
-                    new PrivilegedAddChild(child);
+            PrivilegedAction<Void> dp = new PrivilegedAddChild(child);
             AccessController.doPrivileged(dp);
         } else {
             addChildInternal(child);
         }
     }
 
+    /**
+     * container 添加子容器组件时,会调用组件的start方法
+     * 而在具体的组件的start方法内部又回调用init方法,
+     * 所以热部署,部署多个context 能被正确加载后，初始化、执行start方法就自然而然了
+     *
+     * @param child
+     */
     private void addChildInternal(Container child) {
 
         if (log.isDebugEnabled())
             log.debug("Add child " + child + " " + this);
         synchronized (children) {
             if (children.get(child.getName()) != null)
-                throw new IllegalArgumentException("addChild:  Child name '" +
-                        child.getName() +
-                        "' is not unique");
+                throw new IllegalArgumentException("addChild:  Child name '" + child.getName() + "' is not unique");
             child.setParent(this);  // May throw IAE
             children.put(child.getName(), child);
         }
@@ -983,9 +984,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         // Don't do this inside sync block - start can be a slow process and
         // locking the children object can cause problems elsewhere
         try {
-            if ((getState().isAvailable() ||
-                    LifecycleState.STARTING_PREP.equals(getState())) &&
-                    startChildren) {
+            if ((getState().isAvailable() || LifecycleState.STARTING_PREP.equals(getState())) && startChildren) {
                 child.start();
             }
         } catch (LifecycleException e) {
@@ -1158,8 +1157,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
     @Override
     protected void initInternal() throws LifecycleException {
-        BlockingQueue<Runnable> startStopQueue =
-                new LinkedBlockingQueue<Runnable>();
+        BlockingQueue<Runnable> startStopQueue = new LinkedBlockingQueue<Runnable>();
         startStopExecutor = new ThreadPoolExecutor(
                 getStartStopThreadsInternal(),
                 getStartStopThreadsInternal(), 10, TimeUnit.SECONDS,
@@ -1200,6 +1198,12 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             ((Lifecycle) resources).start();
 
         // Start our child containers, if any
+        /**
+         * tomcat启动时，调用在StandardHost的start方法，
+         * 在未完成应用的加载时StandardHost是没有子组件StandardContext
+         * 所有findChildren()为空
+         *
+         */
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
         for (int i = 0; i < children.length; i++) {
@@ -1221,8 +1225,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
         }
         if (multiThrowable != null) {
-            throw new LifecycleException(sm.getString("containerBase.threadedStartFailed"),
-                    multiThrowable.getThrowable());
+            throw new LifecycleException(sm.getString("containerBase.threadedStartFailed"), multiThrowable.getThrowable());
         }
 
         // Start the Valves in our pipeline (including the basic), if any
@@ -1230,7 +1233,13 @@ public abstract class ContainerBase extends LifecycleMBeanBase
             ((Lifecycle) pipeline).start();
         }
 
-
+        /**
+         * tomcat启动时，调用在StandardHost的start方法，
+         * 在未完成应用的加载时StandardHost是没有子组件StandardContext
+         * 所以findChildren()为空
+         * 所以代码执行setState(LifecycleState.STARTING);
+         * 触发了STARTING事件，调用了HostConfig事件内部的start()逻辑
+         */
         setState(LifecycleState.STARTING);
 
         // Start our thread
@@ -1554,6 +1563,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase
     /**
      * Start the background thread that will periodically check for
      * session timeouts.
+     * StandardEngine、StandardHost 都会调用super.startInternal()方法，
+     * 按默认配置，后台理应没有后台线程，实际只有一个
+     * 因为StandardEngine的构造函数最后将父类的 backgroundProcessorDelay 的值由默认值-1修改为10
      */
     protected void threadStart() {
 
@@ -1605,8 +1617,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase
         @Override
         public void run() {
             Throwable t = null;
-            String unexpectedDeathMessage = sm.getString(
-                    "containerBase.backgroundProcess.unexpectedThreadDeath",
+            String unexpectedDeathMessage = sm.getString("containerBase.backgroundProcess.unexpectedThreadDeath",
                     Thread.currentThread().getName());
             try {
                 while (!threadDone) {

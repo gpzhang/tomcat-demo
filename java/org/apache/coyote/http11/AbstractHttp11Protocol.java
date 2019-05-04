@@ -16,16 +16,11 @@
  */
 package org.apache.coyote.http11;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.coyote.AbstractProtocol;
 import org.apache.tomcat.util.res.StringManager;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
 
@@ -33,7 +28,7 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * The string manager for this package.
      */
     protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+            StringManager.getManager(Constants.Package);
 
 
     @Override
@@ -46,34 +41,40 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
     // ------------------------------------------ managed in the ProtocolHandler
 
     private String relaxedPathChars = null;
+
     public String getRelaxedPathChars() {
         return relaxedPathChars;
     }
+
     public void setRelaxedPathChars(String relaxedPathChars) {
         this.relaxedPathChars = relaxedPathChars;
     }
 
 
     private String relaxedQueryChars = null;
+
     public String getRelaxedQueryChars() {
         return relaxedQueryChars;
     }
+
     public void setRelaxedQueryChars(String relaxedQueryChars) {
         this.relaxedQueryChars = relaxedQueryChars;
     }
 
 
     private boolean allowHostHeaderMismatch = true;
+
     /**
      * Will Tomcat accept an HTTP 1.1 request where the host header does not
      * agree with the host specified (if any) in the request line?
      *
      * @return {@code true} if Tomcat will allow such requests, otherwise
-     *         {@code false}
+     * {@code false}
      */
     public boolean getAllowHostHeaderMismatch() {
         return allowHostHeaderMismatch;
     }
+
     /**
      * Will Tomcat accept an HTTP 1.1 request where the host header does not
      * agree with the host specified (if any) in the request line?
@@ -87,23 +88,27 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
 
 
     private boolean rejectIllegalHeaderName = false;
+
     /**
      * If an HTTP request is received that contains an illegal header name (i.e.
      * the header name is not a token) will the request be rejected (with a 400
      * response) or will the illegal header be ignored.
      *
      * @return {@code true} if the request will be rejected or {@code false} if
-     *         the header will be ignored
+     * the header will be ignored
      */
-    public boolean getRejectIllegalHeaderName() { return rejectIllegalHeaderName; }
+    public boolean getRejectIllegalHeaderName() {
+        return rejectIllegalHeaderName;
+    }
+
     /**
      * If an HTTP request is received that contains an illegal header name (i.e.
      * the header name is not a token) should the request be rejected (with a
      * 400 response) or should the illegal header be ignored.
      *
-     * @param rejectIllegalHeaderName   {@code true} to reject requests with
-     *                                  illegal header names, {@code false} to
-     *                                  ignore the header
+     * @param rejectIllegalHeaderName {@code true} to reject requests with
+     *                                illegal header names, {@code false} to
+     *                                ignore the header
      */
     public void setRejectIllegalHeaderName(boolean rejectIllegalHeaderName) {
         this.rejectIllegalHeaderName = rejectIllegalHeaderName;
@@ -111,7 +116,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
 
 
     private int socketBuffer = 9000;
-    public int getSocketBuffer() { return socketBuffer; }
+
+    public int getSocketBuffer() {
+        return socketBuffer;
+    }
+
     public void setSocketBuffer(int socketBuffer) {
         this.socketBuffer = socketBuffer;
     }
@@ -122,16 +131,28 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * requests, such as a POST.
      */
     private int maxSavePostSize = 4 * 1024;
-    public int getMaxSavePostSize() { return maxSavePostSize; }
-    public void setMaxSavePostSize(int valueI) { maxSavePostSize = valueI; }
+
+    public int getMaxSavePostSize() {
+        return maxSavePostSize;
+    }
+
+    public void setMaxSavePostSize(int valueI) {
+        maxSavePostSize = valueI;
+    }
 
 
     /**
      * Maximum size of the HTTP message header.
      */
     private int maxHttpHeaderSize = 8 * 1024;
-    public int getMaxHttpHeaderSize() { return maxHttpHeaderSize; }
-    public void setMaxHttpHeaderSize(int valueI) { maxHttpHeaderSize = valueI; }
+
+    public int getMaxHttpHeaderSize() {
+        return maxHttpHeaderSize;
+    }
+
+    public void setMaxHttpHeaderSize(int valueI) {
+        maxHttpHeaderSize = valueI;
+    }
 
 
     /**
@@ -139,7 +160,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * upload.
      */
     private int connectionUploadTimeout = 300000;
-    public int getConnectionUploadTimeout() { return connectionUploadTimeout; }
+
+    public int getConnectionUploadTimeout() {
+        return connectionUploadTimeout;
+    }
+
     public void setConnectionUploadTimeout(int i) {
         connectionUploadTimeout = i;
     }
@@ -150,7 +175,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * socket timeout will be used for the full duration of the connection.
      */
     private boolean disableUploadTimeout = true;
-    public boolean getDisableUploadTimeout() { return disableUploadTimeout; }
+
+    public boolean getDisableUploadTimeout() {
+        return disableUploadTimeout;
+    }
+
     public void setDisableUploadTimeout(boolean isDisabled) {
         disableUploadTimeout = isDisabled;
     }
@@ -160,44 +189,64 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * Integrated compression support.
      */
     private String compression = "off";
-    public String getCompression() { return compression; }
-    public void setCompression(String valueS) { compression = valueS; }
+
+    public String getCompression() {
+        return compression;
+    }
+
+    public void setCompression(String valueS) {
+        compression = valueS;
+    }
 
 
     private String noCompressionUserAgents = null;
+
     public String getNoCompressionUserAgents() {
         return noCompressionUserAgents;
     }
+
     public void setNoCompressionUserAgents(String valueS) {
         noCompressionUserAgents = valueS;
     }
 
 
     private String compressibleMimeTypes = "text/html,text/xml,text/plain,text/css,text/javascript,application/javascript";
+
     @Deprecated
     public String getCompressableMimeType() {
         return getCompressibleMimeType();
     }
+
     @Deprecated
     public void setCompressableMimeType(String valueS) {
         setCompressibleMimeType(valueS);
     }
+
     @Deprecated
     public String getCompressableMimeTypes() {
         return getCompressibleMimeType();
     }
+
     @Deprecated
     public void setCompressableMimeTypes(String valueS) {
         setCompressibleMimeType(valueS);
     }
-    public String getCompressibleMimeType() { return compressibleMimeTypes; }
+
+    public String getCompressibleMimeType() {
+        return compressibleMimeTypes;
+    }
+
     public void setCompressibleMimeType(String valueS) {
         compressibleMimeTypes = valueS;
     }
 
 
     private int compressionMinSize = 2048;
-    public int getCompressionMinSize() { return compressionMinSize; }
+
+    public int getCompressionMinSize() {
+        return compressionMinSize;
+    }
+
     public void setCompressionMinSize(int valueI) {
         compressionMinSize = valueI;
     }
@@ -208,7 +257,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * restricted to HTTP/1.0 support.
      */
     private String restrictedUserAgents = null;
-    public String getRestrictedUserAgents() { return restrictedUserAgents; }
+
+    public String getRestrictedUserAgents() {
+        return restrictedUserAgents;
+    }
+
     public void setRestrictedUserAgents(String valueS) {
         restrictedUserAgents = valueS;
     }
@@ -218,8 +271,12 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * Server header.
      */
     private String server;
-    public String getServer() { return server; }
-    public void setServer( String server ) {
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
         this.server = server;
     }
 
@@ -228,7 +285,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * Maximum size of trailing headers in bytes
      */
     private int maxTrailerSize = 8192;
-    public int getMaxTrailerSize() { return maxTrailerSize; }
+
+    public int getMaxTrailerSize() {
+        return maxTrailerSize;
+    }
+
     public void setMaxTrailerSize(int maxTrailerSize) {
         this.maxTrailerSize = maxTrailerSize;
     }
@@ -238,7 +299,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * Maximum size of extension information in chunked encoding
      */
     private int maxExtensionSize = 8192;
-    public int getMaxExtensionSize() { return maxExtensionSize; }
+
+    public int getMaxExtensionSize() {
+        return maxExtensionSize;
+    }
+
     public void setMaxExtensionSize(int maxExtensionSize) {
         this.maxExtensionSize = maxExtensionSize;
     }
@@ -248,7 +313,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * Maximum amount of request body to swallow.
      */
     private int maxSwallowSize = 2 * 1024 * 1024;
-    public int getMaxSwallowSize() { return maxSwallowSize; }
+
+    public int getMaxSwallowSize() {
+        return maxSwallowSize;
+    }
+
     public void setMaxSwallowSize(int maxSwallowSize) {
         this.maxSwallowSize = maxSwallowSize;
     }
@@ -260,7 +329,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * behind a reverse proxy.
      */
     private boolean secure;
-    public boolean getSecure() { return secure; }
+
+    public boolean getSecure() {
+        return secure;
+    }
+
     public void setSecure(boolean b) {
         secure = b;
     }
@@ -271,7 +344,11 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      * delayed asynchronous writes using HTTP upgraded connections.
      */
     private int upgradeAsyncWriteBufferSize = 8192;
-    public int getUpgradeAsyncWriteBufferSize() { return upgradeAsyncWriteBufferSize; }
+
+    public int getUpgradeAsyncWriteBufferSize() {
+        return upgradeAsyncWriteBufferSize;
+    }
+
     public void setUpgradeAsyncWriteBufferSize(int upgradeAsyncWriteBufferSize) {
         this.upgradeAsyncWriteBufferSize = upgradeAsyncWriteBufferSize;
     }
@@ -283,6 +360,7 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
      */
     private Set<String> allowedTrailerHeaders =
             Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+
     public void setAllowedTrailerHeaders(String commaSeparatedHeaders) {
         // Jump through some hoops so we don't end up with an empty set while
         // doing updates.
@@ -301,6 +379,7 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
             allowedTrailerHeaders.removeAll(toRemove);
         }
     }
+
     public String getAllowedTrailerHeaders() {
         // Chances of a size change between these lines are small enough that a
         // sync is unnecessary.
@@ -318,16 +397,19 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
         }
         return result.toString();
     }
+
     public void addAllowedTrailerHeader(String header) {
         if (header != null) {
             allowedTrailerHeaders.add(header.trim().toLowerCase(Locale.ENGLISH));
         }
     }
+
     public void removeAllowedTrailerHeader(String header) {
         if (header != null) {
             allowedTrailerHeaders.remove(header.trim().toLowerCase(Locale.ENGLISH));
         }
     }
+
     protected Set<String> getAllowedTrailerHeadersAsSet() {
         return allowedTrailerHeaders;
     }
@@ -336,7 +418,10 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
     // ------------------------------------------------ HTTP specific properties
     // ------------------------------------------ passed through to the EndPoint
 
-    public boolean isSSLEnabled() { return endpoint.isSSLEnabled();}
+    public boolean isSSLEnabled() {
+        return endpoint.isSSLEnabled();
+    }
+
     public void setSSLEnabled(boolean SSLEnabled) {
         endpoint.setSSLEnabled(SSLEnabled);
     }
@@ -349,6 +434,7 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
     public int getMaxKeepAliveRequests() {
         return endpoint.getMaxKeepAliveRequests();
     }
+
     public void setMaxKeepAliveRequests(int mkar) {
         endpoint.setMaxKeepAliveRequests(mkar);
     }

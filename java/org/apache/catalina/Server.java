@@ -70,7 +70,7 @@ public interface Server extends Lifecycle {
      * @param globalNamingResources The new global naming resources
      */
     public void setGlobalNamingResources
-        (NamingResources globalNamingResources);
+    (NamingResources globalNamingResources);
 
 
     /**

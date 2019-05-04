@@ -19,29 +19,22 @@
 package org.apache.catalina.core;
 
 
-import java.util.ArrayList;
-
-import javax.management.ObjectName;
-
-import org.apache.catalina.Contained;
-import org.apache.catalina.Container;
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Pipeline;
-import org.apache.catalina.Valve;
+import org.apache.catalina.*;
 import org.apache.catalina.util.LifecycleBase;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.ExceptionUtils;
 
+import javax.management.ObjectName;
+import java.util.ArrayList;
+
 
 /**
  * Standard implementation of a processing <b>Pipeline</b> that will invoke
  * a series of Valves that have been configured to be called in order.  This
  * implementation can be used for any type of Container.
- *
+ * <p>
  * <b>IMPLEMENTATION WARNING</b> - This implementation assumes that no
  * calls to <code>addValve()</code> or <code>removeValve</code> are allowed
  * while a request is currently being processed.  Otherwise, the mechanism
@@ -50,8 +43,7 @@ import org.apache.tomcat.util.ExceptionUtils;
  * @author Craig R. McClanahan
  */
 
-public class StandardPipeline extends LifecycleBase
-        implements Pipeline, Contained {
+public class StandardPipeline extends LifecycleBase implements Pipeline, Contained {
 
     private static final Log log = LogFactory.getLog(StandardPipeline.class);
 
@@ -107,7 +99,7 @@ public class StandardPipeline extends LifecycleBase
      * The first valve associated with this Pipeline.
      */
     protected Valve first = null;
-    
+
     // --------------------------------------------------------- Public Methods
 
 
@@ -119,16 +111,16 @@ public class StandardPipeline extends LifecycleBase
         return info;
 
     }
-    
+
     @Override
     public boolean isAsyncSupported() {
-        Valve valve = (first!=null)?first:basic;
+        Valve valve = (first != null) ? first : basic;
         boolean supported = true;
-        while (supported && valve!=null) {
+        while (supported && valve != null) {
             supported = supported & valve.isAsyncSupported();
             valve = valve.getNext();
         }
-        return supported; 
+        return supported;
     }
 
 
@@ -164,13 +156,13 @@ public class StandardPipeline extends LifecycleBase
         // NOOP
     }
 
-    
+
     /**
      * Start {@link Valve}s) in this pipeline and implement the requirements
      * of {@link LifecycleBase#startInternal()}.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
@@ -194,8 +186,8 @@ public class StandardPipeline extends LifecycleBase
      * Stop {@link Valve}s) in this pipeline and implement the requirements
      * of {@link LifecycleBase#stopInternal()}.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     @Override
     protected synchronized void stopInternal() throws LifecycleException {
@@ -214,7 +206,7 @@ public class StandardPipeline extends LifecycleBase
         }
     }
 
-    
+
     @Override
     protected void destroyInternal() {
         Valve[] valves = getValves();
@@ -223,7 +215,7 @@ public class StandardPipeline extends LifecycleBase
         }
     }
 
-    
+
     /**
      * Return a String representation of this component.
      */
@@ -313,7 +305,7 @@ public class StandardPipeline extends LifecycleBase
             }
             current = current.getNext();
         }
-        
+
         this.basic = valve;
 
     }
@@ -330,17 +322,16 @@ public class StandardPipeline extends LifecycleBase
      * if it is already associated with a different Container.</p>
      *
      * @param valve Valve to be added
-     *
-     * @exception IllegalArgumentException if this Container refused to
-     *  accept the specified Valve
-     * @exception IllegalArgumentException if the specified Valve refuses to be
-     *  associated with this Container
-     * @exception IllegalStateException if the specified Valve is already
-     *  associated with a different Container
+     * @throws IllegalArgumentException if this Container refused to
+     *                                  accept the specified Valve
+     * @throws IllegalArgumentException if the specified Valve refuses to be
+     *                                  associated with this Container
+     * @throws IllegalStateException    if the specified Valve is already
+     *                                  associated with a different Container
      */
     @Override
     public void addValve(Valve valve) {
-    
+
         // Validate that we can add this Valve
         if (valve instanceof Contained)
             ((Contained) valve).setContainer(this.container);
@@ -371,7 +362,7 @@ public class StandardPipeline extends LifecycleBase
                 current = current.getNext();
             }
         }
-        
+
         container.fireContainerEvent(Container.ADD_VALVE_EVENT, valve);
     }
 
@@ -428,7 +419,7 @@ public class StandardPipeline extends LifecycleBase
     public void removeValve(Valve valve) {
 
         Valve current;
-        if(first == valve) {
+        if (first == valve) {
             first = first.getNext();
             current = null;
         } else {
@@ -462,7 +453,7 @@ public class StandardPipeline extends LifecycleBase
                 log.error("StandardPipeline.removeValve: destroy: ", e);
             }
         }
-        
+
         container.fireContainerEvent(Container.REMOVE_VALVE_EVENT, valve);
     }
 
@@ -472,7 +463,7 @@ public class StandardPipeline extends LifecycleBase
         if (first != null) {
             return first;
         }
-        
+
         return basic;
     }
 }

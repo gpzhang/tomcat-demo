@@ -17,16 +17,7 @@
 package org.apache.catalina.valves;
 
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
-import org.apache.catalina.Contained;
-import org.apache.catalina.Container;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.LifecycleState;
-import org.apache.catalina.Pipeline;
-import org.apache.catalina.Valve;
+import org.apache.catalina.*;
 import org.apache.catalina.comet.CometEvent;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -34,6 +25,9 @@ import org.apache.catalina.mbeans.MBeanUtils;
 import org.apache.catalina.util.LifecycleMBeanBase;
 import org.apache.juli.logging.Log;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
 
 
 /**
@@ -46,7 +40,7 @@ import org.apache.tomcat.util.res.StringManager;
  * @author Craig R. McClanahan
  */
 public abstract class ValveBase extends LifecycleMBeanBase
-    implements Contained, Valve {
+        implements Contained, Valve {
 
     //------------------------------------------------------ Constructor
 
@@ -80,8 +74,7 @@ public abstract class ValveBase extends LifecycleMBeanBase
      * Descriptive information about this Valve implementation.  This value
      * should be overridden by subclasses.
      */
-    protected static final String info =
-        "org.apache.catalina.core.ValveBase/1.0";
+    protected static final String info = "org.apache.catalina.core.ValveBase/1.0";
 
 
     /**
@@ -93,8 +86,7 @@ public abstract class ValveBase extends LifecycleMBeanBase
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-        StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     //-------------------------------------------------------------- Properties
@@ -191,15 +183,13 @@ public abstract class ValveBase extends LifecycleMBeanBase
      * <p>
      * This method <strong>MUST</strong> be provided by a subclass.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs
-     * @exception ServletException if a servlet error occurs
+     * @throws IOException      if an input/output error occurs
+     * @throws ServletException if a servlet error occurs
      */
     @Override
-    public abstract void invoke(Request request, Response response)
-        throws IOException, ServletException;
+    public abstract void invoke(Request request, Response response) throws IOException, ServletException;
 
 
     /**
@@ -207,17 +197,16 @@ public abstract class ValveBase extends LifecycleMBeanBase
      * a subclass, unless it needs to reassociate a particular object with
      * the thread that is processing the request.
      *
-     * @param request The servlet request to be processed
+     * @param request  The servlet request to be processed
      * @param response The servlet response to be created
-     *
-     * @exception IOException if an input/output error occurs, or is thrown
-     *  by a subsequently invoked Valve, Filter, or Servlet
-     * @exception ServletException if a servlet error occurs, or is thrown
-     *  by a subsequently invoked Valve, Filter, or Servlet
+     * @throws IOException      if an input/output error occurs, or is thrown
+     *                          by a subsequently invoked Valve, Filter, or Servlet
+     * @throws ServletException if a servlet error occurs, or is thrown
+     *                          by a subsequently invoked Valve, Filter, or Servlet
      */
     @Override
     public void event(Request request, Response response, CometEvent event)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
         // Perform the request
         getNext().event(request, response, event);
     }
@@ -235,8 +224,8 @@ public abstract class ValveBase extends LifecycleMBeanBase
      * Start this component and implement the requirements
      * of {@link org.apache.catalina.util.LifecycleBase#startInternal()}.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
@@ -249,8 +238,8 @@ public abstract class ValveBase extends LifecycleMBeanBase
      * Stop this component and implement the requirements
      * of {@link org.apache.catalina.util.LifecycleBase#stopInternal()}.
      *
-     * @exception LifecycleException if this component detects a fatal error
-     *  that prevents this component from being used
+     * @throws LifecycleException if this component detects a fatal error
+     *                            that prevents this component from being used
      */
     @Override
     protected synchronized void stopInternal() throws LifecycleException {
@@ -302,7 +291,7 @@ public abstract class ValveBase extends LifecycleMBeanBase
                 if (valve.getClass() == this.getClass()) {
                     // Duplicate valve earlier in pipeline
                     // increment sequence number
-                    seq ++;
+                    seq++;
                 }
             }
         }

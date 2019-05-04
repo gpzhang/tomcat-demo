@@ -28,7 +28,7 @@ public class SocketWrapper<E> {
     // thread to the thread checking the timeout.
     protected volatile long lastAccess = System.currentTimeMillis();
     protected volatile long timeout = -1;
-    
+
     protected boolean error = false;
     protected long lastRegistered = 0;
     protected volatile int keepAliveLeft = 100;
@@ -60,22 +60,49 @@ public class SocketWrapper<E> {
         this.socket = socket;
         ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
         this.blockingStatusReadLock = lock.readLock();
-        this.blockingStatusWriteLock =lock.writeLock();
+        this.blockingStatusWriteLock = lock.writeLock();
     }
 
     public E getSocket() {
         return socket;
     }
 
-    public boolean isComet() { return comet; }
-    public void setComet(boolean comet) { this.comet = comet; }
-    public boolean isAsync() { return async; }
-    public void setAsync(boolean async) { this.async = async; }
-    public boolean isUpgraded() { return upgraded; }
-    public void setUpgraded(boolean upgraded) { this.upgraded = upgraded; }
-    public boolean isSecure() { return secure; }
-    public void setSecure(boolean secure) { this.secure = secure; }
-    public long getLastAccess() { return lastAccess; }
+    public boolean isComet() {
+        return comet;
+    }
+
+    public void setComet(boolean comet) {
+        this.comet = comet;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
+
+    public boolean isUpgraded() {
+        return upgraded;
+    }
+
+    public void setUpgraded(boolean upgraded) {
+        this.upgraded = upgraded;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
+
+    public long getLastAccess() {
+        return lastAccess;
+    }
+
     public void access() {
         // Async timeouts are based on the time between the call to startAsync()
         // and complete() / dispatch() so don't update the last access time
@@ -85,7 +112,11 @@ public class SocketWrapper<E> {
             access(System.currentTimeMillis());
         }
     }
-    public void access(long access) { lastAccess = access; }
+
+    public void access(long access) {
+        lastAccess = access;
+    }
+
     public void setTimeout(long timeout) {
         if (timeout > 0) {
             this.timeout = timeout;
@@ -93,22 +124,54 @@ public class SocketWrapper<E> {
             this.timeout = -1;
         }
     }
-    public long getTimeout() {return this.timeout;}
-    public boolean getError() { return error; }
-    public void setError(boolean error) { this.error = error; }
-    public void setKeepAliveLeft(int keepAliveLeft) { this.keepAliveLeft = keepAliveLeft;}
-    public int decrementKeepAlive() { return (--keepAliveLeft);}
-    public boolean isKeptAlive() {return keptAlive;}
-    public void setKeptAlive(boolean keptAlive) {this.keptAlive = keptAlive;}
-    public boolean getBlockingStatus() { return blockingStatus; }
+
+    public long getTimeout() {
+        return this.timeout;
+    }
+
+    public boolean getError() {
+        return error;
+    }
+
+    public void setError(boolean error) {
+        this.error = error;
+    }
+
+    public void setKeepAliveLeft(int keepAliveLeft) {
+        this.keepAliveLeft = keepAliveLeft;
+    }
+
+    public int decrementKeepAlive() {
+        return (--keepAliveLeft);
+    }
+
+    public boolean isKeptAlive() {
+        return keptAlive;
+    }
+
+    public void setKeptAlive(boolean keptAlive) {
+        this.keptAlive = keptAlive;
+    }
+
+    public boolean getBlockingStatus() {
+        return blockingStatus;
+    }
+
     public void setBlockingStatus(boolean blockingStatus) {
         this.blockingStatus = blockingStatus;
     }
-    public Lock getBlockingStatusReadLock() { return blockingStatusReadLock; }
+
+    public Lock getBlockingStatusReadLock() {
+        return blockingStatusReadLock;
+    }
+
     public WriteLock getBlockingStatusWriteLock() {
         return blockingStatusWriteLock;
     }
-    public Object getWriteThreadLock() { return writeThreadLock; }
+
+    public Object getWriteThreadLock() {
+        return writeThreadLock;
+    }
 
     public void reset(E socket, long timeout) {
         async = false;

@@ -98,8 +98,11 @@ public abstract class LifecycleBase implements Lifecycle {
         }
 
         try {
+            //组件的状态初始化之前都是LifecycleState.NEW
+            //在开始执行对应组件的初始方法之前,把组件的状态修改为LifecycleState.INITIALIZING
             setStateInternal(LifecycleState.INITIALIZING, null, false);
             initInternal();
+            //在开始执行对应组件的初始方法之后,把组件的状态修改为LifecycleState.INITIALIZED
             setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -117,8 +120,9 @@ public abstract class LifecycleBase implements Lifecycle {
     @Override
     public final synchronized void start() throws LifecycleException {
 
-        if (LifecycleState.STARTING_PREP.equals(state) || LifecycleState.STARTING.equals(state) ||
-                LifecycleState.STARTED.equals(state)) {
+        if (LifecycleState.STARTING_PREP.equals(state)
+                || LifecycleState.STARTING.equals(state)
+                || LifecycleState.STARTED.equals(state)) {
 
             if (log.isDebugEnabled()) {
                 Exception e = new LifecycleException();
@@ -134,14 +138,16 @@ public abstract class LifecycleBase implements Lifecycle {
             init();
         } else if (state.equals(LifecycleState.FAILED)) {
             stop();
-        } else if (!state.equals(LifecycleState.INITIALIZED) &&
-                !state.equals(LifecycleState.STOPPED)) {
+        } else if (!state.equals(LifecycleState.INITIALIZED) && !state.equals(LifecycleState.STOPPED)) {
             invalidTransition(Lifecycle.BEFORE_START_EVENT);
         }
 
         try {
+            //组件的执行start方法前都是LifecycleState.INITIALIZED
+            //在开始执行对应组件的start方法之前,把组件的状态修改为LifecycleState.STARTING_PREP
             setStateInternal(LifecycleState.STARTING_PREP, null, false);
             startInternal();
+            //在执行对应组件的start方法之后,把组件的状态修改为相应状态
             if (state.equals(LifecycleState.FAILED)) {
                 // This is a 'controlled' failure. The component put itself into the
                 // FAILED state so call stop() to complete the clean-up.
@@ -263,8 +269,7 @@ public abstract class LifecycleBase implements Lifecycle {
             }
         }
 
-        if (LifecycleState.DESTROYING.equals(state) ||
-                LifecycleState.DESTROYED.equals(state)) {
+        if (LifecycleState.DESTROYING.equals(state) || LifecycleState.DESTROYED.equals(state)) {
 
             if (log.isDebugEnabled()) {
                 Exception e = new LifecycleException();
@@ -327,8 +332,7 @@ public abstract class LifecycleBase implements Lifecycle {
      *
      * @param state The new state for this component
      */
-    protected synchronized void setState(LifecycleState state)
-            throws LifecycleException {
+    protected synchronized void setState(LifecycleState state) throws LifecycleException {
         setStateInternal(state, null, true);
     }
 
@@ -347,8 +351,7 @@ public abstract class LifecycleBase implements Lifecycle {
         setStateInternal(state, data, true);
     }
 
-    private synchronized void setStateInternal(LifecycleState state,
-                                               Object data, boolean check) throws LifecycleException {
+    private synchronized void setStateInternal(LifecycleState state, Object data, boolean check) throws LifecycleException {
 
         if (log.isDebugEnabled()) {
             log.debug(sm.getString("lifecycleBase.setState", this, state));
@@ -389,8 +392,7 @@ public abstract class LifecycleBase implements Lifecycle {
     }
 
     private void invalidTransition(String type) throws LifecycleException {
-        String msg = sm.getString("lifecycleBase.invalidTransition", type,
-                toString(), state);
+        String msg = sm.getString("lifecycleBase.invalidTransition", type, toString(), state);
         throw new LifecycleException(msg);
     }
 }

@@ -16,12 +16,6 @@
  */
 package org.apache.coyote.http11;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.util.Set;
-
 import org.apache.coyote.ActionCode;
 import org.apache.coyote.http11.filters.BufferedInputFilter;
 import org.apache.juli.logging.Log;
@@ -33,6 +27,12 @@ import org.apache.tomcat.util.net.SSLSupport;
 import org.apache.tomcat.util.net.SocketStatus;
 import org.apache.tomcat.util.net.SocketWrapper;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Set;
+
 
 /**
  * Processes HTTP requests.
@@ -43,25 +43,25 @@ import org.apache.tomcat.util.net.SocketWrapper;
 public class Http11Processor extends AbstractHttp11Processor<Socket> {
 
     private static final Log log = LogFactory.getLog(Http11Processor.class);
+
     @Override
     protected Log getLog() {
         return log;
     }
 
-   // ------------------------------------------------------------ Constructor
+    // ------------------------------------------------------------ Constructor
 
 
     public Http11Processor(int headerBufferSize, boolean rejectIllegalHeaderName,
-            JIoEndpoint endpoint, int maxTrailerSize, Set<String> allowedTrailerHeaders,
-            int maxExtensionSize, int maxSwallowSize, String relaxedPathChars,
-            String relaxedQueryChars) {
+                           JIoEndpoint endpoint, int maxTrailerSize, Set<String> allowedTrailerHeaders,
+                           int maxExtensionSize, int maxSwallowSize, String relaxedPathChars,
+                           String relaxedQueryChars) {
 
         super(endpoint);
-        
+
         httpParser = new HttpParser(relaxedPathChars, relaxedQueryChars);
 
-        inputBuffer = new InternalInputBuffer(request, headerBufferSize, rejectIllegalHeaderName,
-                httpParser);
+        inputBuffer = new InternalInputBuffer(request, headerBufferSize, rejectIllegalHeaderName, httpParser);
         request.setInputBuffer(inputBuffer);
 
         outputBuffer = new InternalOutputBuffer(response, headerBufferSize);
@@ -91,7 +91,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
      */
     protected SSLSupport sslSupport;
 
-    
+
     /**
      * The percentage of threads that have to be in use before keep-alive is
      * disabled to aid scalability.
@@ -122,7 +122,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
 
     @Override
     protected boolean disableKeepAlive() {
-        int threadRatio = -1;   
+        int threadRatio = -1;
         // These may return zero or negative values
         // Only calculate a thread ratio when both are >0 to ensure we get a
         // sensible result
@@ -132,10 +132,10 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
             threadRatio = (threadsBusy * 100) / maxThreads;
         }
         // Disable keep-alive if we are running low on threads      
-        if (threadRatio > getDisableKeepAlivePercentage()) {     
+        if (threadRatio > getDisableKeepAlivePercentage()) {
             return true;
         }
-        
+
         return false;
     }
 
@@ -158,7 +158,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
                 firstReadTimeout = 0;
             } else {
                 long queueTime =
-                    System.currentTimeMillis() - socketWrapper.getLastAccess();
+                        System.currentTimeMillis() - socketWrapper.getLastAccess();
 
                 if (queueTime >= keepAliveTimeout) {
                     // Queued for longer than timeout but there might be
@@ -176,7 +176,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
             }
             // Once the first byte has been read, the standard timeout should be
             // used so restore it here.
-            if (endpoint.getSoTimeout()> 0) {
+            if (endpoint.getSoTimeout() > 0) {
                 setSocketTimeout(endpoint.getSoTimeout());
             } else {
                 setSocketTimeout(0);
@@ -196,8 +196,8 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
     protected void setSocketTimeout(int timeout) throws IOException {
         socketWrapper.getSocket().setSoTimeout(timeout);
     }
-    
-    
+
+
     @Override
     protected void setCometTimeouts(SocketWrapper<Socket> socketWrapper) {
         // NO-OP for BIO
@@ -215,7 +215,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
         return false;
     }
 
-    
+
     @Override
     protected void resetTimeouts() {
         // NOOP for BIO
@@ -245,146 +245,146 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
      * Send an action to the connector.
      *
      * @param actionCode Type of the action
-     * @param param Action parameter
+     * @param param      Action parameter
      */
     @SuppressWarnings("incomplete-switch") // Other cases are handled by action()
     @Override
     public void actionInternal(ActionCode actionCode, Object param) {
 
         switch (actionCode) {
-        case REQ_SSL_ATTRIBUTE: {
-            try {
-                if (sslSupport != null) {
-                    Object sslO = sslSupport.getCipherSuite();
-                    if (sslO != null)
-                        request.setAttribute
-                            (SSLSupport.CIPHER_SUITE_KEY, sslO);
-                    sslO = sslSupport.getPeerCertificateChain(false);
-                    if (sslO != null)
-                        request.setAttribute
-                            (SSLSupport.CERTIFICATE_KEY, sslO);
-                    sslO = sslSupport.getKeySize();
-                    if (sslO != null)
-                        request.setAttribute
-                            (SSLSupport.KEY_SIZE_KEY, sslO);
-                    sslO = sslSupport.getSessionId();
-                    if (sslO != null)
-                        request.setAttribute
-                            (SSLSupport.SESSION_ID_KEY, sslO);
-                    sslO = sslSupport.getProtocol();
-                    if (sslO != null) {
-                        request.setAttribute
-                            (SSLSupport.PROTOCOL_VERSION_KEY, sslO);
-                    }
-                    request.setAttribute(SSLSupport.SESSION_MGR, sslSupport);
-                }
-            } catch (Exception e) {
-                log.warn(sm.getString("http11processor.socket.ssl"), e);
-            }
-            break;
-        }
-        case REQ_HOST_ADDR_ATTRIBUTE: {
-            if ((remoteAddr == null) && (socketWrapper != null)) {
-                InetAddress inetAddr = socketWrapper.getSocket().getInetAddress();
-                if (inetAddr != null) {
-                    remoteAddr = inetAddr.getHostAddress();
-                }
-            }
-            request.remoteAddr().setString(remoteAddr);
-            break;
-        }
-        case REQ_LOCAL_NAME_ATTRIBUTE: {
-            if ((localName == null) && (socketWrapper != null)) {
-                InetAddress inetAddr = socketWrapper.getSocket().getLocalAddress();
-                if (inetAddr != null) {
-                    localName = inetAddr.getHostName();
-                }
-            }
-            request.localName().setString(localName);
-            break;
-        }
-        case REQ_HOST_ATTRIBUTE: {
-            if ((remoteHost == null) && (socketWrapper != null)) {
-                InetAddress inetAddr = socketWrapper.getSocket().getInetAddress();
-                if (inetAddr != null) {
-                    remoteHost = inetAddr.getHostName();
-                }
-                if(remoteHost == null) {
-                    if(remoteAddr != null) {
-                        remoteHost = remoteAddr;
-                    } else { // all we can do is punt
-                        request.remoteHost().recycle();
-                    }
-                }
-            }
-            request.remoteHost().setString(remoteHost);
-            break;
-        }
-        case REQ_LOCAL_ADDR_ATTRIBUTE: {
-            if (localAddr == null)
-               localAddr = socketWrapper.getSocket().getLocalAddress().getHostAddress();
-
-            request.localAddr().setString(localAddr);
-            break;
-        }
-        case REQ_REMOTEPORT_ATTRIBUTE: {
-            if ((remotePort == -1 ) && (socketWrapper !=null)) {
-                remotePort = socketWrapper.getSocket().getPort();
-            }
-            request.setRemotePort(remotePort);
-            break;
-        }
-        case REQ_LOCALPORT_ATTRIBUTE: {
-            if ((localPort == -1 ) && (socketWrapper !=null)) {
-                localPort = socketWrapper.getSocket().getLocalPort();
-            }
-            request.setLocalPort(localPort);
-            break;
-        }
-        case REQ_SSL_CERTIFICATE: {
-            if (sslSupport != null) {
-                /*
-                 * Consume and buffer the request body, so that it does not
-                 * interfere with the client's handshake messages
-                 */
-                InputFilter[] inputFilters = inputBuffer.getFilters();
-                ((BufferedInputFilter) inputFilters[Constants.BUFFERED_FILTER])
-                    .setLimit(maxSavePostSize);
-                inputBuffer.addActiveFilter
-                    (inputFilters[Constants.BUFFERED_FILTER]);
+            case REQ_SSL_ATTRIBUTE: {
                 try {
-                    Object sslO = sslSupport.getPeerCertificateChain(true);
-                    if( sslO != null) {
-                        request.setAttribute
-                            (SSLSupport.CERTIFICATE_KEY, sslO);
+                    if (sslSupport != null) {
+                        Object sslO = sslSupport.getCipherSuite();
+                        if (sslO != null)
+                            request.setAttribute
+                                    (SSLSupport.CIPHER_SUITE_KEY, sslO);
+                        sslO = sslSupport.getPeerCertificateChain(false);
+                        if (sslO != null)
+                            request.setAttribute
+                                    (SSLSupport.CERTIFICATE_KEY, sslO);
+                        sslO = sslSupport.getKeySize();
+                        if (sslO != null)
+                            request.setAttribute
+                                    (SSLSupport.KEY_SIZE_KEY, sslO);
+                        sslO = sslSupport.getSessionId();
+                        if (sslO != null)
+                            request.setAttribute
+                                    (SSLSupport.SESSION_ID_KEY, sslO);
+                        sslO = sslSupport.getProtocol();
+                        if (sslO != null) {
+                            request.setAttribute
+                                    (SSLSupport.PROTOCOL_VERSION_KEY, sslO);
+                        }
+                        request.setAttribute(SSLSupport.SESSION_MGR, sslSupport);
                     }
                 } catch (Exception e) {
                     log.warn(sm.getString("http11processor.socket.ssl"), e);
                 }
+                break;
             }
-            break;
-        }
-        case ASYNC_COMPLETE: {
-            if (asyncStateMachine.asyncComplete()) {
-                ((JIoEndpoint) endpoint).processSocketAsync(this.socketWrapper,
-                        SocketStatus.OPEN_READ);
+            case REQ_HOST_ADDR_ATTRIBUTE: {
+                if ((remoteAddr == null) && (socketWrapper != null)) {
+                    InetAddress inetAddr = socketWrapper.getSocket().getInetAddress();
+                    if (inetAddr != null) {
+                        remoteAddr = inetAddr.getHostAddress();
+                    }
+                }
+                request.remoteAddr().setString(remoteAddr);
+                break;
             }
-            break;
-        }
-        case ASYNC_SETTIMEOUT: {
-            if (param == null) return;
-            long timeout = ((Long)param).longValue();
-            // if we are not piggy backing on a worker thread, set the timeout
-            socketWrapper.setTimeout(timeout);
-            break;
-        }
-        case ASYNC_DISPATCH: {
-            if (asyncStateMachine.asyncDispatch()) {
-                ((JIoEndpoint) endpoint).processSocketAsync(this.socketWrapper,
-                        SocketStatus.OPEN_READ);
+            case REQ_LOCAL_NAME_ATTRIBUTE: {
+                if ((localName == null) && (socketWrapper != null)) {
+                    InetAddress inetAddr = socketWrapper.getSocket().getLocalAddress();
+                    if (inetAddr != null) {
+                        localName = inetAddr.getHostName();
+                    }
+                }
+                request.localName().setString(localName);
+                break;
             }
-            break;
-        }
+            case REQ_HOST_ATTRIBUTE: {
+                if ((remoteHost == null) && (socketWrapper != null)) {
+                    InetAddress inetAddr = socketWrapper.getSocket().getInetAddress();
+                    if (inetAddr != null) {
+                        remoteHost = inetAddr.getHostName();
+                    }
+                    if (remoteHost == null) {
+                        if (remoteAddr != null) {
+                            remoteHost = remoteAddr;
+                        } else { // all we can do is punt
+                            request.remoteHost().recycle();
+                        }
+                    }
+                }
+                request.remoteHost().setString(remoteHost);
+                break;
+            }
+            case REQ_LOCAL_ADDR_ATTRIBUTE: {
+                if (localAddr == null)
+                    localAddr = socketWrapper.getSocket().getLocalAddress().getHostAddress();
+
+                request.localAddr().setString(localAddr);
+                break;
+            }
+            case REQ_REMOTEPORT_ATTRIBUTE: {
+                if ((remotePort == -1) && (socketWrapper != null)) {
+                    remotePort = socketWrapper.getSocket().getPort();
+                }
+                request.setRemotePort(remotePort);
+                break;
+            }
+            case REQ_LOCALPORT_ATTRIBUTE: {
+                if ((localPort == -1) && (socketWrapper != null)) {
+                    localPort = socketWrapper.getSocket().getLocalPort();
+                }
+                request.setLocalPort(localPort);
+                break;
+            }
+            case REQ_SSL_CERTIFICATE: {
+                if (sslSupport != null) {
+                /*
+                 * Consume and buffer the request body, so that it does not
+                 * interfere with the client's handshake messages
+                 */
+                    InputFilter[] inputFilters = inputBuffer.getFilters();
+                    ((BufferedInputFilter) inputFilters[Constants.BUFFERED_FILTER])
+                            .setLimit(maxSavePostSize);
+                    inputBuffer.addActiveFilter
+                            (inputFilters[Constants.BUFFERED_FILTER]);
+                    try {
+                        Object sslO = sslSupport.getPeerCertificateChain(true);
+                        if (sslO != null) {
+                            request.setAttribute
+                                    (SSLSupport.CERTIFICATE_KEY, sslO);
+                        }
+                    } catch (Exception e) {
+                        log.warn(sm.getString("http11processor.socket.ssl"), e);
+                    }
+                }
+                break;
+            }
+            case ASYNC_COMPLETE: {
+                if (asyncStateMachine.asyncComplete()) {
+                    ((JIoEndpoint) endpoint).processSocketAsync(this.socketWrapper,
+                            SocketStatus.OPEN_READ);
+                }
+                break;
+            }
+            case ASYNC_SETTIMEOUT: {
+                if (param == null) return;
+                long timeout = ((Long) param).longValue();
+                // if we are not piggy backing on a worker thread, set the timeout
+                socketWrapper.setTimeout(timeout);
+                break;
+            }
+            case ASYNC_DISPATCH: {
+                if (asyncStateMachine.asyncDispatch()) {
+                    ((JIoEndpoint) endpoint).processSocketAsync(this.socketWrapper,
+                            SocketStatus.OPEN_READ);
+                }
+                break;
+            }
         }
     }
 

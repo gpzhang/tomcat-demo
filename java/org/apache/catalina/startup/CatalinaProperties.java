@@ -18,6 +18,8 @@
 
 package org.apache.catalina.startup;
 
+import org.apache.catalina.Globals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,8 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import org.apache.catalina.Globals;
 
 
 /**
@@ -40,8 +40,8 @@ public class CatalinaProperties {
 
     // ------------------------------------------------------- Static Variables
 
-    private static final org.apache.juli.logging.Log log=
-        org.apache.juli.logging.LogFactory.getLog( CatalinaProperties.class );
+    private static final org.apache.juli.logging.Log log =
+            org.apache.juli.logging.LogFactory.getLog(CatalinaProperties.class);
 
     private static Properties properties = null;
 
@@ -60,7 +60,7 @@ public class CatalinaProperties {
      * Return specified property value.
      */
     public static String getProperty(String name) {
-    
+
         return properties.getProperty(name);
 
     }
@@ -69,7 +69,7 @@ public class CatalinaProperties {
     /**
      * Return specified property value.
      *
-     * @deprecated  Unused - will be removed in 8.0.x
+     * @deprecated Unused - will be removed in 8.0.x
      */
     @Deprecated
     public static String getProperty(String name, String defaultValue) {
@@ -113,7 +113,7 @@ public class CatalinaProperties {
         if (is == null) {
             try {
                 is = CatalinaProperties.class.getResourceAsStream
-                    ("/org/apache/catalina/startup/catalina.properties");
+                        ("/org/apache/catalina/startup/catalina.properties");
             } catch (Throwable t) {
                 handleThrowable(t);
             }
@@ -126,9 +126,7 @@ public class CatalinaProperties {
             } catch (Throwable t) {
                 handleThrowable(t);
                 error = t;
-            }
-            finally
-            {
+            } finally {
                 try {
                     is.close();
                 } catch (IOException ioe) {
@@ -141,7 +139,7 @@ public class CatalinaProperties {
             // Do something
             log.warn("Failed to load catalina.properties", error);
             // That's fine - we have reasonable defaults.
-            properties=new Properties();
+            properties = new Properties();
         }
 
         // Register the properties as system properties
@@ -162,10 +160,10 @@ public class CatalinaProperties {
      */
     private static String getCatalinaHome() {
         return System.getProperty(Globals.CATALINA_HOME_PROP,
-                                  System.getProperty("user.dir"));
+                System.getProperty("user.dir"));
     }
-    
-    
+
+
     /**
      * Get the value of the catalina.base environment variable.
      */

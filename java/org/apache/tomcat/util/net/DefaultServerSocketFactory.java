@@ -32,27 +32,24 @@ import java.net.Socket;
 public class DefaultServerSocketFactory implements ServerSocketFactory {
 
     /**
-     *
-     * @param endpoint  Unused in this implementation.
+     * @param endpoint Unused in this implementation.
      */
     public DefaultServerSocketFactory(AbstractEndpoint<?> endpoint) {
     }
 
     @Override
-    public ServerSocket createSocket (int port) throws IOException {
-        return  new ServerSocket (port);
+    public ServerSocket createSocket(int port) throws IOException {
+        return new ServerSocket(port);
     }
 
     @Override
-    public ServerSocket createSocket (int port, int backlog)
-            throws IOException {
-        return new ServerSocket (port, backlog);
+    public ServerSocket createSocket(int port, int backlog) throws IOException {
+        return new ServerSocket(port, backlog);
     }
 
     @Override
-    public ServerSocket createSocket (int port, int backlog,
-            InetAddress ifAddress) throws IOException {
-        return new ServerSocket (port, backlog, ifAddress);
+    public ServerSocket createSocket(int port, int backlog, InetAddress ifAddress) throws IOException {
+        return new ServerSocket(port, backlog, ifAddress);
     }
 
     @Override

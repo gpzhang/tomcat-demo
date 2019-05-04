@@ -123,18 +123,21 @@ public interface Service extends Lifecycle {
 
     /**
      * Adds a named executor to the service
+     *
      * @param ex Executor
      */
     public void addExecutor(Executor ex);
 
     /**
      * Retrieves all executors
+     *
      * @return Executor[]
      */
     public Executor[] findExecutors();
 
     /**
      * Retrieves executor by name, null if not found
+     *
      * @param name String
      * @return Executor
      */
@@ -142,6 +145,7 @@ public interface Service extends Lifecycle {
 
     /**
      * Removes an executor from the service
+     *
      * @param ex Executor
      */
     public void removeExecutor(Executor ex);

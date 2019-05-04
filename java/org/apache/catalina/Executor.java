@@ -32,8 +32,8 @@ public interface Executor extends java.util.concurrent.Executor, Lifecycle {
      *
      * @param command the runnable task
      * @throws java.util.concurrent.RejectedExecutionException if this task
-     * cannot be accepted for execution - the queue is full
-     * @throws NullPointerException if command or unit is null
+     *                                                         cannot be accepted for execution - the queue is full
+     * @throws NullPointerException                            if command or unit is null
      */
     void execute(Runnable command, long timeout, TimeUnit unit);
 }

@@ -76,8 +76,7 @@ public class StandardEngine extends ContainerBase implements Engine {
     /**
      * The descriptive information string for this implementation.
      */
-    private static final String info =
-            "org.apache.catalina.core.StandardEngine/1.0";
+    private static final String info = "org.apache.catalina.core.StandardEngine/1.0";
 
 
     /**
@@ -102,8 +101,7 @@ public class StandardEngine extends ContainerBase implements Engine {
      * Default access log to use for request/response pairs where we can't ID
      * the intended host and context.
      */
-    private final AtomicReference<AccessLog> defaultAccessLog =
-            new AtomicReference<AccessLog>();
+    private final AtomicReference<AccessLog> defaultAccessLog = new AtomicReference<AccessLog>();
 
     // ------------------------------------------------------------- Properties
 
@@ -151,8 +149,7 @@ public class StandardEngine extends ContainerBase implements Engine {
         } else {
             this.defaultHost = host.toLowerCase(Locale.ENGLISH);
         }
-        support.firePropertyChange("defaultHost", oldDefaultHost,
-                this.defaultHost);
+        support.firePropertyChange("defaultHost", oldDefaultHost, this.defaultHost);
 
     }
 
@@ -227,8 +224,7 @@ public class StandardEngine extends ContainerBase implements Engine {
     public void addChild(Container child) {
 
         if (!(child instanceof Host))
-            throw new IllegalArgumentException
-                    (sm.getString("standardEngine.notHost"));
+            throw new IllegalArgumentException(sm.getString("standardEngine.notHost"));
         super.addChild(child);
 
     }
@@ -255,8 +251,7 @@ public class StandardEngine extends ContainerBase implements Engine {
     @Override
     public void setParent(Container container) {
 
-        throw new IllegalArgumentException
-                (sm.getString("standardEngine.notParent"));
+        throw new IllegalArgumentException(sm.getString("standardEngine.notParent"));
 
     }
 
@@ -266,6 +261,15 @@ public class StandardEngine extends ContainerBase implements Engine {
         // Ensure that a Realm is present before any attempt is made to start
         // one. This will create the default NullRealm if necessary.
         getRealm();
+        /**
+         * 由此可见StandardEngine组件只是调用了父类的方法initInternal()
+         * 为其自身初始化一个startStopExecutor线程池，该线程池用于调用子组件的start()方法。
+         * 另外也可以看到StandardEngine组件初始化时并没有像StandardServer初始化时内部执行了StandardService的初始化、
+         * StandardService初始化时内部执行了StandardEngine的初始化
+         * 而StandardHost的初始化是在StandardEngine执行start方法时
+         * 通过startStopExecutor线程池创建一个线程来启动StandardHost(即调用start方法),
+         * 并在逻辑执行过程中判断是否需要先初始化，实际上是先走了初始化逻辑
+         */
         super.initInternal();
     }
 
@@ -412,17 +416,14 @@ public class StandardEngine extends ContainerBase implements Engine {
         }
     }
 
-    protected static final class AccessLogListener
-            implements PropertyChangeListener, LifecycleListener,
-            ContainerListener {
+    protected static final class AccessLogListener implements PropertyChangeListener, LifecycleListener, ContainerListener {
 
         private StandardEngine engine;
         private Host host;
         private Context context;
         private volatile boolean disabled = false;
 
-        public AccessLogListener(StandardEngine engine, Host host,
-                                 Context context) {
+        public AccessLogListener(StandardEngine engine, Host host, Context context) {
             this.engine = engine;
             this.host = host;
             this.context = context;
