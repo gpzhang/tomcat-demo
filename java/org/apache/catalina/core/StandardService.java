@@ -94,6 +94,8 @@ public class StandardService extends LifecycleMBeanBase implements Service {
      * The Container associated with this Service. (In the case of the
      * org.apache.catalina.startup.Embedded subclass, this holds the most
      * recently added Engine.)
+     * <p>
+     * container组件实际类为StandardEngine
      */
     protected Container container = null;
 
@@ -351,6 +353,8 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
     /**
      * Adds a named executor to the service
+     * 
+     * digester 创建StandardService时会调用改方法添加一个StandardThreadExecutor对象
      *
      * @param ex Executor
      */
@@ -431,6 +435,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
      */
     @Override
     protected void startInternal() throws LifecycleException {
+        System.out.println("standardService.startInternal 线程:{" + Thread.currentThread().getName() + "}");
 
         if (log.isInfoEnabled())
             log.info(sm.getString("standardService.start.name", this.name));
@@ -533,9 +538,12 @@ public class StandardService extends LifecycleMBeanBase implements Service {
      */
     @Override
     protected void initInternal() throws LifecycleException {
+        System.out.println("standardService.initInternal 线程:{" + Thread.currentThread().getName() + "}");
 
         super.initInternal();
-
+        /**
+         * 调用组件StandardEngine的init方法
+         */
         if (container != null) {
             container.init();
         }
@@ -554,8 +562,7 @@ public class StandardService extends LifecycleMBeanBase implements Service {
                 try {
                     connector.init();
                 } catch (Exception e) {
-                    String message = sm.getString(
-                            "standardService.connector.initFailed", connector);
+                    String message = sm.getString("standardService.connector.initFailed", connector);
                     log.error(message, e);
 
                     if (Boolean.getBoolean("org.apache.catalina.startup.EXIT_ON_INIT_FAILURE"))

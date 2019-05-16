@@ -17,10 +17,6 @@
 
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-
 import org.apache.coyote.ActionCode;
 import org.apache.coyote.OutputBuffer;
 import org.apache.coyote.Response;
@@ -28,13 +24,17 @@ import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.net.AbstractEndpoint;
 import org.apache.tomcat.util.net.SocketWrapper;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+
 /**
  * Output buffer.
  *
  * @author <a href="mailto:remm@apache.org">Remy Maucherat</a>
  */
 public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
-    implements ByteChunk.ByteOutputChannel {
+        implements ByteChunk.ByteOutputChannel {
 
     // ----------------------------------------------------------- Constructors
 
@@ -97,8 +97,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
     // --------------------------------------------------------- Public Methods
 
     @Override
-    public void init(SocketWrapper<Socket> socketWrapper,
-            AbstractEndpoint<Socket> endpoint) throws IOException {
+    public void init(SocketWrapper<Socket> socketWrapper, AbstractEndpoint<Socket> endpoint) throws IOException {
 
         outputStream = socketWrapper.getSocket().getOutputStream();
     }
@@ -110,8 +109,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
      * @throws IOException an underlying I/O error occurred
      */
     @Override
-    public void flush()
-        throws IOException {
+    public void flush() throws IOException {
 
         super.flush();
 
@@ -154,7 +152,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
      */
     @Override
     public void endRequest()
-        throws IOException {
+            throws IOException {
         super.endRequest();
         if (useSocketBuffer) {
             socketBuffer.flushBuffer();
@@ -170,7 +168,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
      */
     @Override
     public void sendAck()
-        throws IOException {
+            throws IOException {
 
         if (!committed)
             outputStream.write(Constants.ACK_BYTES);
@@ -188,7 +186,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
      */
     @Override
     protected void commit()
-        throws IOException {
+            throws IOException {
 
         // The response is now committed
         committed = true;
@@ -211,7 +209,7 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
      */
     @Override
     public void realWriteBytes(byte cbuf[], int off, int len)
-        throws IOException {
+            throws IOException {
         if (len > 0) {
             outputStream.write(cbuf, off, len);
         }
@@ -237,10 +235,10 @@ public class InternalOutputBuffer extends AbstractOutputBuffer<Socket>
                 int length = chunk.getLength();
                 if (useSocketBuffer) {
                     socketBuffer.append(chunk.getBuffer(), chunk.getStart(),
-                                        length);
+                            length);
                 } else {
                     outputStream.write(chunk.getBuffer(), chunk.getStart(),
-                                       length);
+                            length);
                 }
                 byteCount += chunk.getLength();
                 return chunk.getLength();

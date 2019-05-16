@@ -741,6 +741,9 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
         globalNamingResources.start();
 
         // Start our defined Services
+        /**
+         * 调用组件StandardService的start方法
+         */
         synchronized (servicesLock) {
             for (int i = 0; i < services.length; i++) {
                 services[i].start();
@@ -823,6 +826,9 @@ public final class StandardServer extends LifecycleMBeanBase implements Server {
             }
         }
         // Initialize our defined Services
+        /**
+         * 调用组件StandardService的init方法
+         */
         for (int i = 0; i < services.length; i++) {
             services[i].init();
         }

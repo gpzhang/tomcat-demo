@@ -70,8 +70,7 @@ public class ApplicationContext implements ServletContext {
     static {
         STRICT_SERVLET_COMPLIANCE = Globals.STRICT_SERVLET_COMPLIANCE;
 
-        String requireSlash = System.getProperty(
-                "org.apache.catalina.core.ApplicationContext.GET_RESOURCE_REQUIRE_SLASH");
+        String requireSlash = System.getProperty("org.apache.catalina.core.ApplicationContext.GET_RESOURCE_REQUIRE_SLASH");
         if (requireSlash == null) {
             GET_RESOURCE_REQUIRE_SLASH = STRICT_SERVLET_COMPLIANCE;
         } else {
@@ -115,6 +114,8 @@ public class ApplicationContext implements ServletContext {
 
     /**
      * The Context instance with which we are associated.
+     * StandardContext 的postWorkDirectory->getServletContext->
+     * context = new ApplicationContext(this);
      */
     private StandardContext context = null;
 
@@ -145,15 +146,13 @@ public class ApplicationContext implements ServletContext {
     /**
      * The string manager for this package.
      */
-    private static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    private static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     /**
      * Thread local data used during request dispatch.
      */
-    private ThreadLocal<DispatchData> dispatchData =
-            new ThreadLocal<DispatchData>();
+    private ThreadLocal<DispatchData> dispatchData = new ThreadLocal<DispatchData>();
 
 
     /**

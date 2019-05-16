@@ -76,6 +76,7 @@ public class Http11Processor extends AbstractHttp11Processor<Socket> {
 
     /**
      * Input.
+     * Http11Processor createProcessor()时创建了InternalInputBuffer对象
      */
     protected InternalInputBuffer inputBuffer = null;
 

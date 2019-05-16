@@ -227,6 +227,7 @@ public final class ClassLoaderFactory {
                     @Override
                     public URLClassLoader run() {
                         if (parent == null)
+                            //该构造方法默认获取系统类加载器为父类加载器,即AppClassLoader
                             return new URLClassLoader(array);
                         else
                             return new URLClassLoader(array, parent);

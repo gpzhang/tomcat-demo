@@ -388,9 +388,12 @@ public class Digester extends DefaultHandler2 {
         if (this.classLoader != null) {
             return (this.classLoader);
         }
+        /**
+         * 如果设置使用上下文类加载器,则使用当前线程上下文的ClassLoader,实际是tomcat的类加载器commonLoader
+         * 否则使用当前类的ClassLoader
+         */
         if (this.useContextClassLoader) {
-            ClassLoader classLoader =
-                    Thread.currentThread().getContextClassLoader();
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             if (classLoader != null) {
                 return (classLoader);
             }
@@ -2109,11 +2112,9 @@ public class Digester extends DefaultHandler2 {
      *                      the default Java class name to be created
      * @see ObjectCreateRule
      */
-    public void addObjectCreate(String pattern, String className,
-                                String attributeName) {
+    public void addObjectCreate(String pattern, String className, String attributeName) {
 
-        addRule(pattern,
-                new ObjectCreateRule(className, attributeName));
+        addRule(pattern, new ObjectCreateRule(className, attributeName));
 
     }
 
@@ -2162,11 +2163,9 @@ public class Digester extends DefaultHandler2 {
      *                   for a <code>boolean</code> parameter)
      * @see SetNextRule
      */
-    public void addSetNext(String pattern, String methodName,
-                           String paramType) {
+    public void addSetNext(String pattern, String methodName, String paramType) {
 
-        addRule(pattern,
-                new SetNextRule(methodName, paramType));
+        addRule(pattern, new SetNextRule(methodName, paramType));
 
     }
 

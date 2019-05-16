@@ -214,12 +214,10 @@ final class StandardHostValve extends ValveBase {
 
         // Restore the context classloader
         if (Globals.IS_SECURITY_ENABLED) {
-            PrivilegedAction<Void> pa = new PrivilegedSetTccl(
-                    StandardHostValve.class.getClassLoader());
+            PrivilegedAction<Void> pa = new PrivilegedSetTccl(StandardHostValve.class.getClassLoader());
             AccessController.doPrivileged(pa);
         } else {
-            Thread.currentThread().setContextClassLoader
-                    (StandardHostValve.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(StandardHostValve.class.getClassLoader());
         }
     }
 

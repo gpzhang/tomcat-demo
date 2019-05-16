@@ -273,8 +273,7 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
         if (found) {
             mapper.setDefaultHostName(defaultHost);
         } else {
-            log.warn(sm.getString("mapperListener.unknownDefaultHost",
-                    defaultHost, connector));
+            log.warn(sm.getString("mapperListener.unknownDefaultHost", defaultHost, connector));
         }
     }
 
@@ -293,8 +292,7 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug(sm.getString("mapperListener.registerHost",
-                    host.getName(), domain, connector));
+            log.debug(sm.getString("mapperListener.registerHost", host.getName(), domain, connector));
         }
     }
 
@@ -362,8 +360,7 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
             prepareWrapperMappingInfo(context, (Wrapper) container, wrappers);
 
             if (log.isDebugEnabled()) {
-                log.debug(sm.getString("mapperListener.registerWrapper",
-                        container.getName(), contextPath, connector));
+                log.debug(sm.getString("mapperListener.registerWrapper", container.getName(), contextPath, connector));
             }
         }
 
@@ -373,8 +370,7 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
                 context.getMapperDirectoryRedirectEnabled());
 
         if (log.isDebugEnabled()) {
-            log.debug(sm.getString("mapperListener.registerContext",
-                    contextPath, connector));
+            log.debug(sm.getString("mapperListener.registerContext", contextPath, connector));
         }
     }
 
@@ -452,10 +448,8 @@ public class MapperListener extends LifecycleMBeanBase implements ContainerListe
         boolean resourceOnly = context.isResourceOnlyServlet(wrapperName);
         String[] mappings = wrapper.findMappings();
         for (String mapping : mappings) {
-            boolean jspWildCard = (wrapperName.equals("jsp")
-                    && mapping.endsWith("/*"));
-            wrappers.add(new WrapperMappingInfo(mapping, wrapper, jspWildCard,
-                    resourceOnly));
+            boolean jspWildCard = (wrapperName.equals("jsp") && mapping.endsWith("/*"));
+            wrappers.add(new WrapperMappingInfo(mapping, wrapper, jspWildCard, resourceOnly));
         }
     }
 

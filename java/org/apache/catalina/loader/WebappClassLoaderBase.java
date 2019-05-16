@@ -106,8 +106,7 @@ import java.util.jar.Manifest;
  */
 public abstract class WebappClassLoaderBase extends URLClassLoader implements Lifecycle, InstrumentableClassLoader, PermissionCheck {
 
-    private static final org.apache.juli.logging.Log log =
-            org.apache.juli.logging.LogFactory.getLog(WebappClassLoaderBase.class);
+    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WebappClassLoaderBase.class);
 
     private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
     /**
@@ -133,8 +132,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader implements Li
         Method getClassLoadingLockMethod = null;
         try {
             if (JreCompat.isJre7Available()) {
-                final Method registerParallel =
-                        ClassLoader.class.getDeclaredMethod("registerAsParallelCapable");
+                final Method registerParallel = ClassLoader.class.getDeclaredMethod("registerAsParallelCapable");
                 AccessController.doPrivileged(new PrivilegedAction<Void>() {
                     @Override
                     public Void run() {
@@ -143,8 +141,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader implements Li
                     }
                 });
                 registerParallel.invoke(null);
-                getClassLoadingLockMethod =
-                        ClassLoader.class.getDeclaredMethod("getClassLoadingLock", String.class);
+                getClassLoadingLockMethod = ClassLoader.class.getDeclaredMethod("getClassLoadingLock", String.class);
             }
         } catch (Exception e) {
             // ignore

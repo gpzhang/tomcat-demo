@@ -105,12 +105,15 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
 
     /**
      * The class loader being managed by this Loader component.
+     * <p>
+     * 类为 WebappClassLoader
      */
     private WebappClassLoaderBase classLoader = null;
 
 
     /**
      * The Container with which this Loader has been associated.
+     * StandardContext执行startInternal方法时创建WebappLoader时设置了container的实现类为StandardContext
      */
     private Container container = null;
 
@@ -129,8 +132,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
     /**
      * The descriptive information about this Loader implementation.
      */
-    private static final String info =
-            "org.apache.catalina.loader.WebappLoader/1.0";
+    private static final String info = "org.apache.catalina.loader.WebappLoader/1.0";
 
 
     /**
@@ -143,6 +145,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
 
     /**
      * The parent class loader of the class loader we will create.
+     * 类加载器这里为sharedLoader
      */
     private ClassLoader parentClassLoader = null;
 
@@ -571,8 +574,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
             } catch (Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 // This is likely a dual registration
-                log.info("Dual registration of jndi stream handler: "
-                        + t.getMessage());
+                log.info("Dual registration of jndi stream handler: " + t.getMessage());
             }
         }
 
@@ -615,11 +617,8 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
             if (!contextName.startsWith("/")) {
                 contextName = "/" + contextName;
             }
-            ObjectName cloname = new ObjectName
-                    (MBeanUtils.getDomain(ctx) + ":type=WebappClassLoader,context="
-                            + contextName + ",host=" + ctx.getParent().getName());
-            Registry.getRegistry(null, null)
-                    .registerComponent(classLoader, cloname, null);
+            ObjectName cloname = new ObjectName(MBeanUtils.getDomain(ctx) + ":type=WebappClassLoader,context=" + contextName + ",host=" + ctx.getParent().getName());
+            Registry.getRegistry(null, null).registerComponent(classLoader, cloname, null);
 
         } catch (Throwable t) {
             t = ExceptionUtils.unwrapInvocationTargetException(t);
@@ -696,11 +695,9 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
         // Process a relevant property change
         if (event.getPropertyName().equals("reloadable")) {
             try {
-                setReloadable
-                        (((Boolean) event.getNewValue()).booleanValue());
+                setReloadable(((Boolean) event.getNewValue()).booleanValue());
             } catch (NumberFormatException e) {
-                log.error(sm.getString("webappLoader.reloadable",
-                        event.getNewValue().toString()));
+                log.error(sm.getString("webappLoader.reloadable", event.getNewValue().toString()));
             }
         }
 
@@ -715,8 +712,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
      * 创建WebappClassLoader类加载器
      * 并且指定父类加载器,不使用默认的系统类加载器
      */
-    private WebappClassLoaderBase createClassLoader()
-            throws Exception {
+    private WebappClassLoaderBase createClassLoader() throws Exception {
 
         Class<?> clazz = Class.forName(loaderClass);
         WebappClassLoaderBase classLoader = null;
@@ -728,7 +724,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader, Property
         Object[] args = {parentClassLoader};
         Constructor<?> constr = clazz.getConstructor(argTypes);
         /**
-         * 反射调用有参构造函数
+         * 反射调用WebappClassLoader的有参构造函数（设置父类加载器为sharedLoader）创建WebappClassLoader实例
          */
         classLoader = (WebappClassLoaderBase) constr.newInstance(args);
 

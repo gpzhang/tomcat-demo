@@ -30,8 +30,7 @@ public abstract class LifecycleMBeanBase extends LifecycleBase implements MBeanR
 
     private static Log log = LogFactory.getLog(LifecycleMBeanBase.class);
 
-    private static StringManager sm =
-            StringManager.getManager("org.apache.catalina.util");
+    private static StringManager sm = StringManager.getManager("org.apache.catalina.util");
 
 
     /* Cache components of the MBean registration. */

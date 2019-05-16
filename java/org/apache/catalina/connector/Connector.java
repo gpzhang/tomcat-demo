@@ -210,13 +210,14 @@ public class Connector extends LifecycleMBeanBase {
     /**
      * Coyote protocol handler.
      * 在创建Connector对象是（调用Connector()构造函数）根据是否指定协议
-     * 默认实现类是 Http11Protocol
+     * 默认实现类是 Http11Protocol,且Http11Protocol extends AbstractHttp11JsseProtocol<Socket>
      */
     protected ProtocolHandler protocolHandler = null;
 
 
     /**
      * Coyote adapter.
+     * Connector初始化initInternal时 new CoyoteAdapter(this)
      */
     protected Adapter adapter = null;
 
@@ -996,10 +997,12 @@ public class Connector extends LifecycleMBeanBase {
             if (this.service != null) {
                 errPrefix += "service.getName(): \"" + this.service.getName() + "\"; ";
             }
-
             throw new LifecycleException(errPrefix + " " + sm.getString("coyoteConnector.protocolHandlerStartFailed"), e);
         }
 
+        /**
+         * MapperListener.startInternal()方法将所有Container容器信息保存到了mapper中
+         */
         mapperListener.start();
     }
 

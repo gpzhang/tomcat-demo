@@ -599,8 +599,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
 
         protected final Map<S, Processor<S>> connections = new ConcurrentHashMap<S, Processor<S>>();
 
-        protected RecycledProcessors<P, S> recycledProcessors =
-                new RecycledProcessors<P, S>(this);
+        protected RecycledProcessors<P, S> recycledProcessors = new RecycledProcessors<P, S>(this);
 
 
         protected abstract AbstractProtocol<S> getProtocol();
@@ -619,6 +618,8 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
 
         @SuppressWarnings("deprecation") // Old HTTP upgrade method has been deprecated
         public SocketState process(SocketWrapper<S> wrapper, SocketStatus status) {
+
+            System.out.println("请求处理线程,thread:{ " + Thread.currentThread().getName() + " }");
             if (wrapper == null) {
                 // Nothing to do. Socket has been closed.
                 return SocketState.CLOSED;
@@ -716,9 +717,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
                         inbound.onUpgradeComplete();
                     }
                     if (getLog().isDebugEnabled()) {
-                        getLog().debug("Socket: [" + wrapper +
-                                "], Status in: [" + status +
-                                "], State out: [" + state + "]");
+                        getLog().debug("Socket: [" + wrapper + "], Status in: [" + status + "], State out: [" + state + "]");
                     }
                 } while (state == SocketState.ASYNC_END ||
                         state == SocketState.UPGRADING ||
@@ -767,12 +766,10 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler, MBeanRegis
                 return state;
             } catch (java.net.SocketException e) {
                 // SocketExceptions are normal
-                getLog().debug(sm.getString(
-                        "abstractConnectionHandler.socketexception.debug"), e);
+                getLog().debug(sm.getString("abstractConnectionHandler.socketexception.debug"), e);
             } catch (java.io.IOException e) {
                 // IOExceptions are normal
-                getLog().debug(sm.getString(
-                        "abstractConnectionHandler.ioexception.debug"), e);
+                getLog().debug(sm.getString("abstractConnectionHandler.ioexception.debug"), e);
             }
             // Future developers: if you discover any other
             // rare-but-nonfatal exceptions, catch them here, and log as

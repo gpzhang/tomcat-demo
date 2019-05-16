@@ -168,8 +168,7 @@ public class Http11Protocol extends AbstractHttp11JsseProtocol<Socket> {
             processor.setAdapter(proto.adapter);
             processor.setMaxKeepAliveRequests(proto.getMaxKeepAliveRequests());
             processor.setKeepAliveTimeout(proto.getKeepAliveTimeout());
-            processor.setConnectionUploadTimeout(
-                    proto.getConnectionUploadTimeout());
+            processor.setConnectionUploadTimeout(proto.getConnectionUploadTimeout());
             processor.setDisableUploadTimeout(proto.getDisableUploadTimeout());
             processor.setCompressionMinSize(proto.getCompressionMinSize());
             processor.setCompression(proto.getCompression());
@@ -179,8 +178,7 @@ public class Http11Protocol extends AbstractHttp11JsseProtocol<Socket> {
             processor.setSocketBuffer(proto.getSocketBuffer());
             processor.setMaxSavePostSize(proto.getMaxSavePostSize());
             processor.setServer(proto.getServer());
-            processor.setDisableKeepAlivePercentage(
-                    proto.getDisableKeepAlivePercentage());
+            processor.setDisableKeepAlivePercentage(proto.getDisableKeepAlivePercentage());
             processor.setMaxCookieCount(proto.getMaxCookieCount());
             register(processor);
             return processor;

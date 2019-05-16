@@ -159,6 +159,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
 
     /**
      * The Loader implementation with which this Container is associated.
+     * StandardContext执行startInternal方法内部创建了接口实现类为WebappLoader
      */
     protected Loader loader = null;
     private final ReadWriteLock loaderLock = new ReentrantReadWriteLock();
@@ -251,6 +252,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
 
     /**
      * The background thread.
+     * 创建ContainerBackgroundProcessor线程
      */
     private Thread thread = null;
 
@@ -274,6 +276,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
      * children associated with this container.
      */
     private int startStopThreads = 1;
+    /**
+     * 这个线程池用来执行standardHost.startInternal和standardContext.startInternal方法
+     */
     protected ThreadPoolExecutor startStopExecutor;
 
     // ------------------------------------------------------------- Properties
@@ -423,8 +428,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             // Start the new component if necessary
             if (loader != null)
                 loader.setContainer(this);
-            if (getState().isAvailable() && (loader != null) &&
-                    (loader instanceof Lifecycle)) {
+            if (getState().isAvailable() && (loader != null) && (loader instanceof Lifecycle)) {
                 try {
                     /**
                      * 子类WebappLoader执行继承父类LifecycleBase的start方法
@@ -756,8 +760,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
     public void setParentClassLoader(ClassLoader parent) {
         ClassLoader oldParentClassLoader = this.parentClassLoader;
         this.parentClassLoader = parent;
-        support.firePropertyChange("parentClassLoader", oldParentClassLoader,
-                this.parentClassLoader);
+        support.firePropertyChange("parentClassLoader", oldParentClassLoader, this.parentClassLoader);
 
     }
 
@@ -1155,6 +1158,11 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
     }
 
 
+    /**
+     * 所有Container组件在进行初始化时都会创建startStopExecutor
+     *
+     * @throws LifecycleException
+     */
     @Override
     protected void initInternal() throws LifecycleException {
         BlockingQueue<Runnable> startStopQueue = new LinkedBlockingQueue<Runnable>();
@@ -1198,11 +1206,15 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
             ((Lifecycle) resources).start();
 
         // Start our child containers, if any
+
+        /**
+         * tomcat启动时，调用在StandardEngine的start方法，
+         * findChildren()的获取子组件为StandardHost
+         */
         /**
          * tomcat启动时，调用在StandardHost的start方法，
          * 在未完成应用的加载时StandardHost是没有子组件StandardContext
          * 所有findChildren()为空
-         *
          */
         Container children[] = findChildren();
         List<Future<Void>> results = new ArrayList<Future<Void>>();
@@ -1563,16 +1575,18 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
     /**
      * Start the background thread that will periodically check for
      * session timeouts.
-     * StandardEngine、StandardHost 都会调用super.startInternal()方法，
+     * StandardEngine、StandardHost StandardContext都会调用super.startInternal()方法，
      * 按默认配置，后台理应没有后台线程，实际只有一个
-     * 因为StandardEngine的构造函数最后将父类的 backgroundProcessorDelay 的值由默认值-1修改为10
+     * 因为StandardEngine创建对象时，构造函数将父类的 backgroundProcessorDelay 的值由默认值-1修改为10,
+     * 所以执行逻辑会走到线程开启的逻辑
      */
     protected void threadStart() {
-
+        System.out.println("当前类对象:{ " + this + " }");
         if (thread != null)
             return;
         if (backgroundProcessorDelay <= 0)
             return;
+        System.out.println("当前类对象:{ " + this + " } 创建ContainerBackgroundProcessor");
 
         threadDone = false;
         String threadName = "ContainerBackgroundProcessor[" + toString() + "]";
@@ -1617,8 +1631,7 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         @Override
         public void run() {
             Throwable t = null;
-            String unexpectedDeathMessage = sm.getString("containerBase.backgroundProcess.unexpectedThreadDeath",
-                    Thread.currentThread().getName());
+            String unexpectedDeathMessage = sm.getString("containerBase.backgroundProcess.unexpectedThreadDeath", Thread.currentThread().getName());
             try {
                 while (!threadDone) {
                     try {
@@ -1704,6 +1717,9 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         }
     }
 
+    /**
+     * StartStopThread线程的创建工厂
+     */
     private static class StartStopThreadFactory implements ThreadFactory {
         private final ThreadGroup group;
         private final AtomicInteger threadNumber = new AtomicInteger(1);

@@ -17,21 +17,20 @@
 
 package org.apache.catalina.core;
 
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.http.Cookie;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleState;
 import org.apache.catalina.util.SessionConfig;
 import org.apache.tomcat.util.res.StringManager;
+
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.http.Cookie;
 
 public class ApplicationSessionCookieConfig implements SessionCookieConfig {
 
     /**
      * The string manager for this package.
      */
-    private static final StringManager sm = StringManager
-            .getManager(Constants.Package);
+    private static final StringManager sm = StringManager.getManager(Constants.Package);
 
     private boolean httpOnly;
     private boolean secure;
@@ -154,16 +153,16 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
     /**
      * Creates a new session cookie for the given session ID
      *
-     * @param context     The Context for the web application
-     * @param sessionId   The ID of the session for which the cookie will be
-     *                    created
-     * @param secure      Should session cookie be configured as secure
+     * @param context   The Context for the web application
+     * @param sessionId The ID of the session for which the cookie will be
+     *                  created
+     * @param secure    Should session cookie be configured as secure
      */
     public static Cookie createSessionCookie(Context context,
-            String sessionId, boolean secure) {
+                                             String sessionId, boolean secure) {
 
         SessionCookieConfig scc =
-            context.getServletContext().getSessionCookieConfig();
+                context.getServletContext().getSessionCookieConfig();
 
         // NOTE: The priority order for session cookie configuration is:
         //       1. Context level configuration
@@ -172,11 +171,11 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
 
         Cookie cookie = new Cookie(
                 SessionConfig.getSessionCookieName(context), sessionId);
-       
+
         // Just apply the defaults.
         cookie.setMaxAge(scc.getMaxAge());
         cookie.setComment(scc.getComment());
-       
+
         if (context.getSessionCookieDomain() == null) {
             // Avoid possible NPE
             if (scc.getDomain() != null) {
@@ -195,7 +194,7 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
         if (scc.isHttpOnly() || context.getUseHttpOnly()) {
             cookie.setHttpOnly(true);
         }
-       
+
         String contextPath = context.getSessionCookiePath();
         if (contextPath == null || contextPath.length() == 0) {
             contextPath = scc.getPath();
@@ -227,25 +226,25 @@ public class ApplicationSessionCookieConfig implements SessionCookieConfig {
     /**
      * Determine the name to use for the session cookie for the provided
      * context.
-     * @param context
      *
-     * @deprecated  Replaced by
-     *              {@link SessionConfig#getSessionCookieName(Context)}. This
-     *              will be removed in Tomcat 8.0.x.
+     * @param context
+     * @deprecated Replaced by
+     * {@link SessionConfig#getSessionCookieName(Context)}. This
+     * will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public static String getSessionCookieName(Context context) {
         return SessionConfig.getSessionCookieName(context);
     }
-    
+
     /**
      * Determine the name to use for the session cookie for the provided
      * context.
-     * @param context
      *
-     * @deprecated  Replaced by
-     *              {@link SessionConfig#getSessionUriParamName(Context)}. This
-     *              will be removed in Tomcat 8.0.x.
+     * @param context
+     * @deprecated Replaced by
+     * {@link SessionConfig#getSessionUriParamName(Context)}. This
+     * will be removed in Tomcat 8.0.x.
      */
     @Deprecated
     public static String getSessionUriParamName(Context context) {

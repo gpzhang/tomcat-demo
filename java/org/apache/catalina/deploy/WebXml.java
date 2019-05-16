@@ -42,14 +42,11 @@ import java.util.Map.Entry;
  */
 public class WebXml {
 
-    protected static final String ORDER_OTHERS =
-            "org.apache.catalina.order.others";
+    protected static final String ORDER_OTHERS = "org.apache.catalina.order.others";
 
-    private static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    private static final StringManager sm = StringManager.getManager(Constants.Package);
 
-    private static final org.apache.juli.logging.Log log =
-            org.apache.juli.logging.LogFactory.getLog(WebXml.class);
+    private static final org.apache.juli.logging.Log log = org.apache.juli.logging.LogFactory.getLog(WebXml.class);
 
     // Global defaults are overridable but Servlets and Servlet mappings need to
     // be unique. Duplicates normally trigger an error. This flag indicates if

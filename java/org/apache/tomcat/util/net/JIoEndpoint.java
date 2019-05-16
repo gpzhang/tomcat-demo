@@ -62,6 +62,8 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
     /**
      * Associated server socket.
+     * <p>
+     * 通过serverSocketFactory.createSocket(int port, int backlog)创建
      */
     protected ServerSocket serverSocket = null;
 
@@ -81,6 +83,7 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
     /**
      * Handling of accepted sockets.
+     * 其实现类为Http11ConnectionHandler
      */
     protected Handler handler = null;
 
@@ -94,6 +97,8 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
 
     /**
      * Server socket factory.
+     * <p>
+     * 默认创建 new DefaultServerSocketFactory(this);
      */
     protected ServerSocketFactory serverSocketFactory = null;
 
@@ -310,7 +315,8 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
         protected SocketStatus status = null;
 
         public SocketProcessor(SocketWrapper<Socket> socket) {
-            if (socket == null) throw new NullPointerException();
+            if (socket == null)
+                throw new NullPointerException();
             this.socket = socket;
         }
 
@@ -337,7 +343,9 @@ public class JIoEndpoint extends AbstractEndpoint<Socket> {
                         // Tell to close the socket
                         state = SocketState.CLOSED;
                     }
-
+                    /**
+                     * 正常的请求进来委派给Handler处理
+                     */
                     if ((state != SocketState.CLOSED)) {
                         if (status == null) {
                             state = handler.process(socket, SocketStatus.OPEN_READ);

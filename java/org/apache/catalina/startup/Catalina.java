@@ -86,6 +86,9 @@ public class Catalina {
     // XXX Should be moved to embedded
     /**
      * The shared extensions class loader for this server.
+     * Catalina的类加载器为catalinaLoader,默认配置为器父类加载器 commonLoader;
+     * <p>
+     * 调用了setParentClassLoader方法设置类加载器为sharedLoader
      */
     protected ClassLoader parentClassLoader = Catalina.class.getClassLoader();
 
@@ -299,6 +302,9 @@ public class Catalina {
 
     /**
      * Create and configure the Digester we will be using for startup.
+     * Digester对象创建过程中设置了-----> useContextClassLoader = use;
+     * 因此通过Digester创建的对象的类加载器为线程上下文加载器，
+     * 即StandardServe对象及其关联的类对象的创建是通过线程上下文加载器创建的，实际为commonLoader
      */
     protected Digester createStartDigester() {
         long t1 = System.currentTimeMillis();
@@ -388,6 +394,9 @@ public class Catalina {
         digester.addRuleSet(new NamingRuleSet("Server/Service/Engine/Host/Context/"));
 
         // When the 'engine' is found, set the parentClassLoader.
+        /**
+         * 设置StandardEngine的父类加载器为sharedLoader
+         */
         digester.addRule("Server/Service/Engine", new SetParentClassLoaderRule(parentClassLoader));
         addClusterRuleSet(digester, "Server/Service/Engine/Cluster/");
 
@@ -536,6 +545,9 @@ public class Catalina {
 
     /**
      * Start a new server instance.
+     * 方法内部完成了StandardServer组件的实例化
+     * <p>
+     * 并且执行StandardServer类的init方法
      */
     public void load() {
 
@@ -673,6 +685,7 @@ public class Catalina {
 
     /**
      * Start a new server instance.
+     * 调用组件StandardServer的start方法
      */
     public void start() {
 
@@ -838,8 +851,7 @@ public class Catalina {
         }
 
         String temp = System.getProperty("java.io.tmpdir");
-        if (temp == null || (!(new File(temp)).exists())
-                || (!(new File(temp)).isDirectory())) {
+        if (temp == null || (!(new File(temp)).exists()) || (!(new File(temp)).isDirectory())) {
             log.error(sm.getString("embedded.notmp", temp));
         }
 
@@ -951,6 +963,9 @@ final class SetParentClassLoaderRule extends Rule {
         }
 
         Container top = (Container) digester.peek();
+        /**
+         * 设置Container的父类加载器,主要是StandardEngine的父类加载器
+         */
         top.setParentClassLoader(parentClassLoader);
 
     }

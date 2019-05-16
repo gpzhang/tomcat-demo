@@ -253,6 +253,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
 
     /**
      * The ServletContext implementation associated with this Context.
+     * context = new ApplicationContext(this);
      */
     protected ApplicationContext context = null;
 
@@ -509,8 +510,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
      * The servlet mappings for this web application, keyed by
      * matching pattern.
      */
-    private HashMap<String, String> servletMappings =
-            new HashMap<String, String>();
+    private HashMap<String, String> servletMappings = new HashMap<String, String>();
 
     private final Object servletMappingsLock = new Object();
 
@@ -1364,8 +1364,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
      *                interest
      */
     @Override
-    public void addServletContainerInitializer(
-            ServletContainerInitializer sci, Set<Class<?>> classes) {
+    public void addServletContainerInitializer(ServletContainerInitializer sci, Set<Class<?>> classes) {
         initializers.put(sci, classes);
     }
 
@@ -1663,9 +1662,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
 
         boolean oldConfigured = this.configured;
         this.configured = configured;
-        support.firePropertyChange("configured",
-                oldConfigured,
-                this.configured);
+        support.firePropertyChange("configured", oldConfigured, this.configured);
 
     }
 
@@ -2316,6 +2313,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
      * Return the parent class loader (if any) for this web application.
      * This call is meaningful only <strong>after</strong> a Loader has
      * been configured.
+     * 其中getParentClassLoader方法用来获取父类加载器这里为sharedLoader,具体原因看如下代码
      */
     @Override
     public ClassLoader getParentClassLoader() {
@@ -3535,8 +3533,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             for (int i = 0; i < instanceListeners.length; i++) {
                 try {
                     Class<?> clazz = Class.forName(instanceListeners[i]);
-                    InstanceListener listener =
-                            (InstanceListener) clazz.newInstance();
+                    InstanceListener listener = (InstanceListener) clazz.newInstance();
                     wrapper.addInstanceListener(listener);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -3550,8 +3547,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             for (int i = 0; i < wrapperLifecycles.length; i++) {
                 try {
                     Class<?> clazz = Class.forName(wrapperLifecycles[i]);
-                    LifecycleListener listener =
-                            (LifecycleListener) clazz.getDeclaredConstructor().newInstance();
+                    LifecycleListener listener = (LifecycleListener) clazz.getDeclaredConstructor().newInstance();
                     wrapper.addLifecycleListener(listener);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -3565,8 +3561,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             for (int i = 0; i < wrapperListeners.length; i++) {
                 try {
                     Class<?> clazz = Class.forName(wrapperListeners[i]);
-                    ContainerListener listener =
-                            (ContainerListener) clazz.getDeclaredConstructor().newInstance();
+                    ContainerListener listener = (ContainerListener) clazz.getDeclaredConstructor().newInstance();
                     wrapper.addContainerListener(listener);
                 } catch (Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -3938,8 +3933,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
 
         synchronized (servletMappingsLock) {
             String results[] = new String[servletMappings.size()];
-            return
-                    (servletMappings.keySet().toArray(results));
+            return (servletMappings.keySet().toArray(results));
         }
 
     }
@@ -5335,7 +5329,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
-
+        System.out.println("standardContext.startInternal 线程:{" + Thread.currentThread().getName() + "}");
         if (log.isDebugEnabled())
             log.debug("Starting " + getBaseName());
 
@@ -5380,7 +5374,8 @@ public class StandardContext extends ContainerBase implements Context, Notificat
         }
 
         /**
-         * 创建并启动WebappClassLoader类记载器,
+         * 创建并启动WebappLoader类记载器,
+         * 其中getParentClassLoader方法用来获取父类加载器这里为sharedLoader,具体原因getParentClassLoader
          */
         if (getLoader() == null) {
             WebappLoader webappLoader = new WebappLoader(getParentClassLoader());
@@ -6441,8 +6436,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
             if (hostWorkDir != null) {
                 workDir = hostWorkDir + File.separator + temp;
             } else {
-                workDir = "work" + File.separator + engineName +
-                        File.separator + hostName + File.separator + temp;
+                workDir = "work" + File.separator + engineName + File.separator + hostName + File.separator + temp;
             }
             setWorkDir(workDir);
         }
@@ -6456,13 +6450,11 @@ public class StandardContext extends ContainerBase implements Context, Notificat
                 catalinaHomePath = catalinaHome.getCanonicalPath();
                 dir = new File(catalinaHomePath, workDir);
             } catch (IOException e) {
-                log.warn(sm.getString("standardContext.workCreateException",
-                        workDir, catalinaHomePath, getName()), e);
+                log.warn(sm.getString("standardContext.workCreateException", workDir, catalinaHomePath, getName()), e);
             }
         }
         if (!dir.mkdirs() && !dir.isDirectory()) {
-            log.warn(sm.getString("standardContext.workCreateFail", dir,
-                    getName()));
+            log.warn(sm.getString("standardContext.workCreateFail", dir, getName()));
         }
 
         // Set the appropriate servlet context attribute
@@ -6636,6 +6628,8 @@ public class StandardContext extends ContainerBase implements Context, Notificat
 
     @Override
     protected void initInternal() throws LifecycleException {
+        System.out.println("standardContext.initInternal 线程:{" + Thread.currentThread().getName() + "}");
+
         super.initInternal();
 
         if (processTlds) {
@@ -6910,8 +6904,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
     }
 
 
-    private static class NoPluggabilityServletContext
-            implements ServletContext {
+    private static class NoPluggabilityServletContext implements ServletContext {
 
         private final ServletContext sc;
 

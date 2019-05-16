@@ -1649,8 +1649,7 @@ public class ContextConfig implements LifecycleListener {
                         log.error(sm.getString("contextConfig.applicationUrl"));
                     }
                 } else {
-                    stream = servletContext.getResourceAsStream
-                            (Constants.ApplicationWebXml);
+                    stream = servletContext.getResourceAsStream(Constants.ApplicationWebXml);
                     try {
                         url = servletContext.getResource(
                                 Constants.ApplicationWebXml);

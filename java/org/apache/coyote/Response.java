@@ -16,14 +16,14 @@
  */
 package org.apache.coyote;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Locale;
-
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.http.parser.HttpParser;
 import org.apache.tomcat.util.http.parser.MediaType;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Locale;
 
 /**
  * Response object.
@@ -120,8 +120,8 @@ public final class Response {
         return req;
     }
 
-    public void setRequest( Request req ) {
-        this.req=req;
+    public void setRequest(Request req) {
+        this.req = req;
     }
 
     public OutputBuffer getOutputBuffer() {
@@ -167,7 +167,7 @@ public final class Response {
 
     public void action(ActionCode actionCode, Object param) {
         if (hook != null) {
-            if( param==null )
+            if (param == null)
                 hook.action(actionCode, this);
             else
                 hook.action(actionCode, param);
@@ -186,7 +186,7 @@ public final class Response {
     /**
      * Set the response status
      */
-    public void setStatus( int status ) {
+    public void setStatus(int status) {
         this.status = status;
     }
 
@@ -250,7 +250,7 @@ public final class Response {
 
 
     public boolean isExceptionPresent() {
-        return ( errorException != null );
+        return (errorException != null);
     }
 
 
@@ -280,6 +280,7 @@ public final class Response {
 
 
     // -------------------- Headers --------------------
+
     /**
      * Warning: This method always returns <code>false<code> for Content-Type
      * and Content-Length.
@@ -290,22 +291,22 @@ public final class Response {
 
 
     public void setHeader(String name, String value) {
-        char cc=name.charAt(0);
-        if( cc=='C' || cc=='c' ) {
-            if( checkSpecialHeader(name, value) )
-            return;
+        char cc = name.charAt(0);
+        if (cc == 'C' || cc == 'c') {
+            if (checkSpecialHeader(name, value))
+                return;
         }
-        headers.setValue(name).setString( value);
+        headers.setValue(name).setString(value);
     }
 
 
     public void addHeader(String name, String value) {
-        char cc=name.charAt(0);
-        if( cc=='C' || cc=='c' ) {
-            if( checkSpecialHeader(name, value) )
-            return;
+        char cc = name.charAt(0);
+        if (cc == 'C' || cc == 'c') {
+            if (checkSpecialHeader(name, value))
+                return;
         }
-        headers.addValue(name).setString( value );
+        headers.addValue(name).setString(value);
     }
 
 
@@ -314,19 +315,19 @@ public final class Response {
      * Called from set/addHeader.
      * Return true if the header is special, no need to set the header.
      */
-    private boolean checkSpecialHeader( String name, String value) {
+    private boolean checkSpecialHeader(String name, String value) {
         // XXX Eliminate redundant fields !!!
         // ( both header and in special fields )
-        if( name.equalsIgnoreCase( "Content-Type" ) ) {
-            setContentType( value );
+        if (name.equalsIgnoreCase("Content-Type")) {
+            setContentType(value);
             return true;
         }
-        if( name.equalsIgnoreCase( "Content-Length" ) ) {
+        if (name.equalsIgnoreCase("Content-Length")) {
             try {
-                long cL=Long.parseLong( value );
-                setContentLength( cL );
+                long cL = Long.parseLong(value);
+                setContentLength(cL);
                 return true;
-            } catch( NumberFormatException ex ) {
+            } catch (NumberFormatException ex) {
                 // Do nothing - the spec doesn't have any "throws"
                 // and the user might know what he's doing
                 return false;
@@ -336,9 +337,10 @@ public final class Response {
     }
 
 
-    /** Signal that we're done with the headers, and body will follow.
-     *  Any implementation needs to notify ContextManager, to allow
-     *  interceptors to fix headers.
+    /**
+     * Signal that we're done with the headers, and body will follow.
+     * Any implementation needs to notify ContextManager, to allow
+     * interceptors to fix headers.
      */
     public void sendHeaders() {
         action(ActionCode.COMMIT, this);
@@ -402,7 +404,7 @@ public final class Response {
             return;
 
         characterEncoding = charset;
-        charsetSet=true;
+        charsetSet = true;
     }
 
     public String getCharacterEncoding() {
@@ -411,7 +413,7 @@ public final class Response {
 
     /**
      * Sets the content type.
-     *
+     * <p>
      * This method must preserve any response charset that may already have
      * been set via a call to response.setContentType(), response.setLocale(),
      * or response.setCharacterEncoding().
@@ -427,7 +429,7 @@ public final class Response {
 
         MediaType m = null;
         try {
-             m = HttpParser.parseMediaType(new StringReader(type));
+            m = HttpParser.parseMediaType(new StringReader(type));
         } catch (IOException e) {
             // Ignore - null test below handles this
         }
@@ -460,8 +462,8 @@ public final class Response {
         String ret = contentType;
 
         if (ret != null
-            && characterEncoding != null
-            && charsetSet) {
+                && characterEncoding != null
+                && charsetSet) {
             ret = ret + ";charset=" + characterEncoding;
         }
 
@@ -490,10 +492,9 @@ public final class Response {
      * Write a chunk of bytes.
      */
     public void doWrite(ByteChunk chunk/*byte buffer[], int pos, int count*/)
-        throws IOException
-    {
+            throws IOException {
         outputBuffer.doWrite(chunk, this);
-        contentWritten+=chunk.getLength();
+        contentWritten += chunk.getLength();
     }
 
     // --------------------
@@ -514,7 +515,7 @@ public final class Response {
         headers.clear();
 
         // update counters
-        contentWritten=0;
+        contentWritten = 0;
     }
 
     /**

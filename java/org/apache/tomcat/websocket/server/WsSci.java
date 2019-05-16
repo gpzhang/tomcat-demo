@@ -39,8 +39,7 @@ import java.util.Set;
  * {@link ServerEndpoint} so that Endpoint can be published via the WebSocket
  * server.
  */
-@HandlesTypes({ServerEndpoint.class, ServerApplicationConfig.class,
-        Endpoint.class})
+@HandlesTypes({ServerEndpoint.class, ServerApplicationConfig.class, Endpoint.class})
 public class WsSci implements ServletContainerInitializer {
 
     private static boolean logMessageWritten = false;
@@ -80,8 +79,7 @@ public class WsSci implements ServletContainerInitializer {
             wsPackage = wsPackage.substring(0, wsPackage.lastIndexOf('.') + 1);
             for (Class<?> clazz : clazzes) {
                 int modifiers = clazz.getModifiers();
-                if (!Modifier.isPublic(modifiers) ||
-                        Modifier.isAbstract(modifiers)) {
+                if (!Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)) {
                     // Non-public or abstract - skip it.
                     continue;
                 }
@@ -90,13 +88,11 @@ public class WsSci implements ServletContainerInitializer {
                     continue;
                 }
                 if (ServerApplicationConfig.class.isAssignableFrom(clazz)) {
-                    serverApplicationConfigs.add(
-                            (ServerApplicationConfig) clazz.newInstance());
+                    serverApplicationConfigs.add((ServerApplicationConfig) clazz.newInstance());
                 }
                 if (Endpoint.class.isAssignableFrom(clazz)) {
                     @SuppressWarnings("unchecked")
-                    Class<? extends Endpoint> endpoint =
-                            (Class<? extends Endpoint>) clazz;
+                    Class<? extends Endpoint> endpoint = (Class<? extends Endpoint>) clazz;
                     scannedEndpointClazzes.add(endpoint);
                 }
                 if (clazz.isAnnotationPresent(ServerEndpoint.class)) {
@@ -117,14 +113,11 @@ public class WsSci implements ServletContainerInitializer {
             filteredPojoEndpoints.addAll(scannedPojoEndpoints);
         } else {
             for (ServerApplicationConfig config : serverApplicationConfigs) {
-                Set<ServerEndpointConfig> configFilteredEndpoints =
-                        config.getEndpointConfigs(scannedEndpointClazzes);
+                Set<ServerEndpointConfig> configFilteredEndpoints = config.getEndpointConfigs(scannedEndpointClazzes);
                 if (configFilteredEndpoints != null) {
                     filteredEndpointConfigs.addAll(configFilteredEndpoints);
                 }
-                Set<Class<?>> configFilteredPojos =
-                        config.getAnnotatedEndpointClasses(
-                                scannedPojoEndpoints);
+                Set<Class<?>> configFilteredPojos = config.getAnnotatedEndpointClasses(scannedPojoEndpoints);
                 if (configFilteredPojos != null) {
                     filteredPojoEndpoints.addAll(configFilteredPojos);
                 }

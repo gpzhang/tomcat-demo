@@ -1150,8 +1150,7 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
     }
 
 
-    private synchronized void initServlet(Servlet servlet)
-            throws ServletException {
+    private synchronized void initServlet(Servlet servlet) throws ServletException {
 
         if (instanceInitialized && !singleThreadModel) return;
 
@@ -1691,9 +1690,7 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
 
         // Send j2ee.state.starting notification
         if (this.getObjectName() != null) {
-            Notification notification = new Notification("j2ee.state.starting",
-                    this.getObjectName(),
-                    sequenceNumber++);
+            Notification notification = new Notification("j2ee.state.starting", this.getObjectName(), sequenceNumber++);
             broadcaster.sendNotification(notification);
         }
 
@@ -1704,9 +1701,7 @@ public class StandardWrapper extends ContainerBase implements ServletConfig, Wra
 
         // Send j2ee.state.running notification
         if (this.getObjectName() != null) {
-            Notification notification =
-                    new Notification("j2ee.state.running", this.getObjectName(),
-                            sequenceNumber++);
+            Notification notification = new Notification("j2ee.state.running", this.getObjectName(), sequenceNumber++);
             broadcaster.sendNotification(notification);
         }
 

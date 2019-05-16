@@ -79,6 +79,9 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
      * Read the request line. This function is meant to be used during the
      * HTTP request header parsing. Do NOT attempt to read the request body
      * using it.
+     * <p>
+     * 解析http请求头
+     * 不解析http请求body体
      *
      * @throws IOException If an exception occurs during the underlying socket
      *                     read operations, or if the given buffer is not big enough to accommodate
@@ -179,8 +182,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
             if (buf[pos] == Constants.SP || buf[pos] == Constants.HT) {
                 space = true;
                 end = pos;
-            } else if ((buf[pos] == Constants.CR)
-                    || (buf[pos] == Constants.LF)) {
+            } else if ((buf[pos] == Constants.CR) || (buf[pos] == Constants.LF)) {
                 // HTTP/0.9 style request
                 eol = true;
                 space = true;
@@ -522,8 +524,7 @@ public class InternalInputBuffer extends AbstractInputBuffer<Socket> {
         if (parsingHeader) {
 
             if (lastValid == buf.length) {
-                throw new IllegalArgumentException
-                        (sm.getString("iib.requestheadertoolarge.error"));
+                throw new IllegalArgumentException(sm.getString("iib.requestheadertoolarge.error"));
             }
 
             nRead = inputStream.read(buf, pos, buf.length - lastValid);

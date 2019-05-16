@@ -64,6 +64,8 @@ public class StandardThreadExecutor extends LifecycleMBeanBase implements Execut
 
     /**
      * The executor we use for this component
+     * 创建一个线程池
+     * executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), maxIdleTime, TimeUnit.MILLISECONDS, taskqueue, tf);
      */
     protected ThreadPoolExecutor executor = null;
 
@@ -89,6 +91,9 @@ public class StandardThreadExecutor extends LifecycleMBeanBase implements Execut
      */
     protected long threadRenewalDelay = org.apache.tomcat.util.threads.Constants.DEFAULT_THREAD_RENEWAL_DELAY;
 
+    /**
+     * 这个任务队列的用处?
+     */
     private TaskQueue taskqueue = null;
 
     // ---------------------------------------------- Constructors

@@ -131,13 +131,11 @@ public class ObjectCreateRule extends Rule {
             }
         }
         if (digester.log.isDebugEnabled()) {
-            digester.log.debug("[ObjectCreateRule]{" + digester.match +
-                    "}New " + realClassName);
+            digester.log.debug("[ObjectCreateRule]{" + digester.match + "}New " + realClassName);
         }
 
         if (realClassName == null) {
-            throw new NullPointerException("No class name specified for " +
-                    namespace + " " + name);
+            throw new NullPointerException("No class name specified for " + namespace + " " + name);
         }
 
         // Instantiate the new object and push it on the context stack

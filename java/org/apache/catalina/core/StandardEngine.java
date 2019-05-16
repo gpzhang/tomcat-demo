@@ -258,17 +258,19 @@ public class StandardEngine extends ContainerBase implements Engine {
 
     @Override
     protected void initInternal() throws LifecycleException {
+        System.out.println("standardEngine.initInternal 线程:{" + Thread.currentThread().getName() + "}");
+
         // Ensure that a Realm is present before any attempt is made to start
         // one. This will create the default NullRealm if necessary.
         getRealm();
         /**
          * 由此可见StandardEngine组件只是调用了父类的方法initInternal()
          * 为其自身初始化一个startStopExecutor线程池，该线程池用于调用子组件的start()方法。
-         * 另外也可以看到StandardEngine组件初始化时并没有像StandardServer初始化时内部执行了StandardService的初始化、
+         * 另外也可以看到StandardEngine组件初始化时并没有像StandardServer初始化时内部执行了其子组件StandardService的初始化、
          * StandardService初始化时内部执行了StandardEngine的初始化
-         * 而StandardHost的初始化是在StandardEngine执行start方法时
-         * 通过startStopExecutor线程池创建一个线程来启动StandardHost(即调用start方法),
-         * 并在逻辑执行过程中判断是否需要先初始化，实际上是先走了初始化逻辑
+         * 而StandardEngine的子组件StandardHost的初始化是在StandardEngine执行start方法时
+         * 通过startStopExecutor线程池创建一个线程来启动StandardHost（即调用start方法，
+         * 并在逻辑执行过程中判断是否需要先初始化，实际上是先走了初始化逻辑）
          */
         super.initInternal();
     }
@@ -283,6 +285,7 @@ public class StandardEngine extends ContainerBase implements Engine {
      */
     @Override
     protected synchronized void startInternal() throws LifecycleException {
+        System.out.println("standardEngine.startInternal 线程:{" + Thread.currentThread().getName() + "}");
 
         // Log our server identification information
         if (log.isInfoEnabled())

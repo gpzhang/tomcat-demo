@@ -107,8 +107,7 @@ public class CoyoteAdapter implements Adapter {
     /**
      * The string manager for this package.
      */
-    protected static final StringManager sm =
-            StringManager.getManager(Constants.Package);
+    protected static final StringManager sm = StringManager.getManager(Constants.Package);
 
 
     /**
@@ -390,8 +389,7 @@ public class CoyoteAdapter implements Adapter {
      * Service method.
      */
     @Override
-    public void service(org.apache.coyote.Request req, org.apache.coyote.Response res)
-            throws Exception {
+    public void service(org.apache.coyote.Request req, org.apache.coyote.Response res) throws Exception {
 
         Request request = (Request) req.getNote(ADAPTER_NOTES);
         Response response = (Response) res.getNote(ADAPTER_NOTES);
@@ -645,11 +643,8 @@ public class CoyoteAdapter implements Adapter {
     /**
      * Parse additional request parameters.
      */
-    protected boolean postParseRequest(org.apache.coyote.Request req,
-                                       Request request,
-                                       org.apache.coyote.Response res,
-                                       Response response)
-            throws Exception {
+    protected boolean postParseRequest(org.apache.coyote.Request req, Request request,
+                                       org.apache.coyote.Response res, Response response) throws Exception {
 
         // XXX the processor may have set a correct scheme and port prior to this point,
         // in ajp13 protocols don't make sense to get the port from the connector...
@@ -745,7 +740,10 @@ public class CoyoteAdapter implements Adapter {
         boolean mapRequired = true;
 
         while (mapRequired) {
-            // This will map the the latest version by default
+            // This will map the the latest version by
+            /**
+             * 这个地方request通过URI的信息找到属于自己的Context和Wrapper
+             */
             connector.getMapper().map(serverName, decodedURI, version, request.getMappingData());
             request.setContext((Context) request.getMappingData().context);
             request.setWrapper((Wrapper) request.getMappingData().wrapper);
@@ -858,8 +856,7 @@ public class CoyoteAdapter implements Adapter {
         }
 
         // Filter trace method
-        if (!connector.getAllowTrace()
-                && req.method().equalsIgnoreCase("TRACE")) {
+        if (!connector.getAllowTrace() && req.method().equalsIgnoreCase("TRACE")) {
             Wrapper wrapper = request.getWrapper();
             String header = null;
             if (wrapper != null) {
@@ -941,8 +938,7 @@ public class CoyoteAdapter implements Adapter {
      * @param req
      * @param request
      */
-    protected void parsePathParameters(org.apache.coyote.Request req,
-                                       Request request) {
+    protected void parsePathParameters(org.apache.coyote.Request req, Request request) {
 
         // Process in bytes (this is default format so this is normally a NO-OP
         req.decodedURI().toBytes();
@@ -981,30 +977,24 @@ public class CoyoteAdapter implements Adapter {
 
             if (pathParamEnd >= 0) {
                 if (charset != null) {
-                    pv = new String(uriBC.getBuffer(), start + pathParamStart,
-                            pathParamEnd - pathParamStart, charset);
+                    pv = new String(uriBC.getBuffer(), start + pathParamStart, pathParamEnd - pathParamStart, charset);
                 }
                 // Extract path param from decoded request URI
                 byte[] buf = uriBC.getBuffer();
                 for (int i = 0; i < end - start - pathParamEnd; i++) {
-                    buf[start + semicolon + i]
-                            = buf[start + i + pathParamEnd];
+                    buf[start + semicolon + i] = buf[start + i + pathParamEnd];
                 }
-                uriBC.setBytes(buf, start,
-                        end - start - pathParamEnd + semicolon);
+                uriBC.setBytes(buf, start, end - start - pathParamEnd + semicolon);
             } else {
                 if (charset != null) {
-                    pv = new String(uriBC.getBuffer(), start + pathParamStart,
-                            (end - start) - pathParamStart, charset);
+                    pv = new String(uriBC.getBuffer(), start + pathParamStart, (end - start) - pathParamStart, charset);
                 }
                 uriBC.setEnd(start + semicolon);
             }
 
             if (log.isDebugEnabled()) {
-                log.debug(sm.getString("coyoteAdapter.debug", "pathParamStart",
-                        String.valueOf(pathParamStart)));
-                log.debug(sm.getString("coyoteAdapter.debug", "pathParamEnd",
-                        String.valueOf(pathParamEnd)));
+                log.debug(sm.getString("coyoteAdapter.debug", "pathParamStart", String.valueOf(pathParamStart)));
+                log.debug(sm.getString("coyoteAdapter.debug", "pathParamEnd", String.valueOf(pathParamEnd)));
                 log.debug(sm.getString("coyoteAdapter.debug", "pv", pv));
             }
 
@@ -1015,12 +1005,9 @@ public class CoyoteAdapter implements Adapter {
                     String value = pv.substring(equals + 1);
                     request.addPathParameter(name, value);
                     if (log.isDebugEnabled()) {
-                        log.debug(sm.getString("coyoteAdapter.debug", "equals",
-                                String.valueOf(equals)));
-                        log.debug(sm.getString("coyoteAdapter.debug", "name",
-                                name));
-                        log.debug(sm.getString("coyoteAdapter.debug", "value",
-                                value));
+                        log.debug(sm.getString("coyoteAdapter.debug", "equals", String.valueOf(equals)));
+                        log.debug(sm.getString("coyoteAdapter.debug", "name", name));
+                        log.debug(sm.getString("coyoteAdapter.debug", "value", value));
                     }
                 }
             }

@@ -36,8 +36,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
     private static Log log = LogFactory.getLog(LifecycleBase.class);
 
-    private static StringManager sm =
-            StringManager.getManager("org.apache.catalina.util");
+    private static StringManager sm = StringManager.getManager("org.apache.catalina.util");
 
 
     /**
@@ -90,7 +89,15 @@ public abstract class LifecycleBase implements Lifecycle {
         lifecycle.fireLifecycleEvent(type, data);
     }
 
-
+    /**
+     * StandardServer 调用init的处理逻辑
+     * StandardService 调用init的处理逻辑
+     * StandardEngine 调用init的处理逻辑
+     * StandardHost 调用init的处理逻辑
+     * StandardContext 调用init的处理逻辑
+     *
+     * @throws LifecycleException
+     */
     @Override
     public final synchronized void init() throws LifecycleException {
         if (!state.equals(LifecycleState.NEW)) {
@@ -350,6 +357,13 @@ public abstract class LifecycleBase implements Lifecycle {
             throws LifecycleException {
         setStateInternal(state, data, true);
     }
+
+    /**
+     * @param state
+     * @param data
+     * @param check
+     * @throws LifecycleException
+     */
 
     private synchronized void setStateInternal(LifecycleState state, Object data, boolean check) throws LifecycleException {
 

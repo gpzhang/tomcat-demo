@@ -59,9 +59,13 @@ public final class LifecycleSupport {
      */
     private Lifecycle lifecycle = null;
 
-
     /**
      * The set of registered LifecycleListeners for event notifications.
+     * 1、组件StandardServer注册的的LifecycleListeners(主要的)，无
+     * 2、组件StandardService注册的的LifecycleListeners(主要的)，
+     * 3、组件StandardEngine注册的的LifecycleListeners(主要的)，EngineConfig
+     * 4、组件StandardHost注册的的LifecycleListeners(主要的)，HostConfig
+     * 5、组件StandardContext注册的的LifecycleListeners(主要的)，ContextConfig
      */
     private LifecycleListener listeners[] = new LifecycleListener[0];
 

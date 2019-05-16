@@ -17,9 +17,6 @@
 
 package org.apache.coyote;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import org.apache.tomcat.util.buf.ByteChunk;
 import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.buf.UDecoder;
@@ -28,29 +25,32 @@ import org.apache.tomcat.util.http.Cookies;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.util.http.Parameters;
 
+import java.io.IOException;
+import java.util.HashMap;
+
 /**
- * This is a low-level, efficient representation of a server request. Most 
- * fields are GC-free, expensive operations are delayed until the  user code 
+ * This is a low-level, efficient representation of a server request. Most
+ * fields are GC-free, expensive operations are delayed until the  user code
  * needs the information.
- *
+ * <p>
  * Processing is delegated to modules, using a hook mechanism.
- * 
+ * <p>
  * This class is not intended for user code - it is used internally by tomcat
  * for processing the request in the most efficient way. Users ( servlets ) can
  * access the information using a facade, which provides the high-level view
  * of the request.
- *
+ * <p>
  * For lazy evaluation, the request uses the getInfo() hook. The following ids
  * are defined:
  * <ul>
- *  <li>req.encoding - returns the request encoding
- *  <li>req.attribute - returns a module-specific attribute ( like SSL keys, etc ).
+ * <li>req.encoding - returns the request encoding
+ * <li>req.attribute - returns a module-specific attribute ( like SSL keys, etc ).
  * </ul>
- *
+ * <p>
  * Tomcat defines a number of attributes:
  * <ul>
- *   <li>"org.apache.tomcat.request" - allows access to the low-level
- *       request object in trusted applications 
+ * <li>"org.apache.tomcat.request" - allows access to the low-level
+ * request object in trusted applications
  * </ul>
  *
  * @author James Duncan Davidson [duncan@eng.sun.com]
@@ -99,7 +99,7 @@ public final class Request {
     private MessageBytes localNameMB = MessageBytes.newInstance();
     private MessageBytes remoteHostMB = MessageBytes.newInstance();
     private MessageBytes localAddrMB = MessageBytes.newInstance();
-     
+
     private MimeHeaders headers = new MimeHeaders();
 
     private MessageBytes instanceId = MessageBytes.newInstance();
@@ -134,17 +134,17 @@ public final class Request {
     private MessageBytes remoteUser = MessageBytes.newInstance();
     private boolean remoteUserNeedsAuthorization = false;
     private MessageBytes authType = MessageBytes.newInstance();
-    private HashMap<String,Object> attributes = new HashMap<String,Object>();
+    private HashMap<String, Object> attributes = new HashMap<String, Object>();
 
     private Response response;
     private ActionHook hook;
 
-    private long bytesRead=0;
+    private long bytesRead = 0;
     // Time of the request - useful to avoid repeated calls to System.currentTime
     private long startTime = -1;
     private int available = 0;
 
-    private RequestInfo reqProcessorMX=new RequestInfo(this);
+    private RequestInfo reqProcessorMX = new RequestInfo(this);
     // ------------------------------------------------------------- Properties
 
 
@@ -152,7 +152,7 @@ public final class Request {
      * Get the instance id (or JVM route). Currently Ajp is sending it with each
      * request. In future this should be fixed, and sent only once ( or
      * 'negotiated' at config time so both tomcat and apache share the same name.
-     * 
+     *
      * @return the instance id
      */
     public MessageBytes instanceId() {
@@ -175,11 +175,11 @@ public final class Request {
     public MessageBytes scheme() {
         return schemeMB;
     }
-    
+
     public MessageBytes method() {
         return methodMB;
     }
-    
+
     public MessageBytes unparsedURI() {
         return unparsedURIMB;
     }
@@ -199,8 +199,8 @@ public final class Request {
     public MessageBytes protocol() {
         return protoMB;
     }
-    
-    /** 
+
+    /**
      * Return the buffer holding the server name, if
      * any. Use isNull() to check if there is no value
      * set.
@@ -214,9 +214,9 @@ public final class Request {
     public int getServerPort() {
         return serverPort;
     }
-    
-    public void setServerPort(int serverPort ) {
-        this.serverPort=serverPort;
+
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
     }
 
     public MessageBytes remoteAddr() {
@@ -229,25 +229,25 @@ public final class Request {
 
     public MessageBytes localName() {
         return localNameMB;
-    }    
+    }
 
     public MessageBytes localAddr() {
         return localAddrMB;
     }
-    
-    public int getRemotePort(){
+
+    public int getRemotePort() {
         return remotePort;
     }
-        
-    public void setRemotePort(int port){
+
+    public void setRemotePort(int port) {
         this.remotePort = port;
     }
-    
-    public int getLocalPort(){
+
+    public int getLocalPort() {
         return localPort;
     }
-        
-    public void setLocalPort(int port){
+
+    public void setLocalPort(int port) {
         this.localPort = port;
     }
 
@@ -288,7 +288,7 @@ public final class Request {
     }
 
     public long getContentLengthLong() {
-        if( contentLength > -1 ) return contentLength;
+        if (contentLength > -1) return contentLength;
 
         MessageBytes clB = headers.getUniqueValue("content-length");
         contentLength = (clB == null || clB.isNull()) ? -1 : clB.getLong();
@@ -298,7 +298,7 @@ public final class Request {
 
     public String getContentType() {
         contentType();
-        if ((contentTypeMB == null) || contentTypeMB.isNull()) 
+        if ((contentTypeMB == null) || contentTypeMB.isNull())
             return null;
         return contentTypeMB.toString();
     }
@@ -317,7 +317,7 @@ public final class Request {
 
 
     public void setContentType(MessageBytes mb) {
-        contentTypeMB=mb;
+        contentTypeMB = mb;
     }
 
 
@@ -331,17 +331,17 @@ public final class Request {
         return response;
     }
 
-    public void setResponse( Response response ) {
-        this.response=response;
-        response.setRequest( this );
+    public void setResponse(Response response) {
+        this.response = response;
+        response.setRequest(this);
     }
-    
+
     public void action(ActionCode actionCode, Object param) {
-        if( hook==null && response!=null )
-            hook=response.getHook();
-        
+        if (hook == null && response != null)
+            hook = response.getHook();
+
         if (hook != null) {
-            if( param==null ) 
+            if (param == null)
                 hook.action(actionCode, this);
             else
                 hook.action(actionCode, param);
@@ -367,19 +367,19 @@ public final class Request {
 
     // -------------------- Other attributes --------------------
     // We can use notes for most - need to discuss what is of general interest
-    
-    public void setAttribute( String name, Object o ) {
-        attributes.put( name, o );
+
+    public void setAttribute(String name, Object o) {
+        attributes.put(name, o);
     }
 
-    public HashMap<String,Object> getAttributes() {
+    public HashMap<String, Object> getAttributes() {
         return attributes;
     }
 
-    public Object getAttribute(String name ) {
+    public Object getAttribute(String name) {
         return attributes.get(name);
     }
-    
+
     public MessageBytes getRemoteUser() {
         return remoteUser;
     }
@@ -426,18 +426,17 @@ public final class Request {
 
     /**
      * Read data from the input buffer and put it into a byte chunk.
-     *
+     * <p>
      * The buffer is owned by the protocol implementation - it will be reused on the next read.
      * The Adapter must either process the data in place or copy it to a separate buffer if it needs
      * to hold it. In most cases this is done during byte->char conversions or via InputStream. Unlike
      * InputStream, this interface allows the app to process data in place, without copy.
-     *
      */
-    public int doRead(ByteChunk chunk) 
-        throws IOException {
+    public int doRead(ByteChunk chunk)
+            throws IOException {
         int n = inputBuffer.doRead(chunk, this);
         if (n > 0) {
-            bytesRead+=n;
+            bytesRead += n;
         }
         return n;
     }
@@ -461,24 +460,24 @@ public final class Request {
     // -------------------- Per-Request "notes" --------------------
 
 
-    /** 
-     * Used to store private data. Thread data could be used instead - but 
+    /**
+     * Used to store private data. Thread data could be used instead - but
      * if you have the req, getting/setting a note is just a array access, may
      * be faster than ThreadLocal for very frequent operations.
-     * 
-     *  Example use: 
-     *   Jk:
-     *     HandlerRequest.HOSTBUFFER = 10 CharChunk, buffer for Host decoding
-     *     WorkerEnv: SSL_CERT_NOTE=16 - MessageBytes containing the cert
-     *                
-     *   Catalina CoyoteAdapter:
-     *      ADAPTER_NOTES = 1 - stores the HttpServletRequest object ( req/res)             
-     *      
-     *   To avoid conflicts, note in the range 0 - 8 are reserved for the 
-     *   servlet container ( catalina connector, etc ), and values in 9 - 16 
-     *   for connector use. 
-     *   
-     *   17-31 range is not allocated or used.
+     * <p>
+     * Example use:
+     * Jk:
+     * HandlerRequest.HOSTBUFFER = 10 CharChunk, buffer for Host decoding
+     * WorkerEnv: SSL_CERT_NOTE=16 - MessageBytes containing the cert
+     * <p>
+     * Catalina CoyoteAdapter:
+     * ADAPTER_NOTES = 1 - stores the HttpServletRequest object ( req/res)
+     * <p>
+     * To avoid conflicts, note in the range 0 - 8 are reserved for the
+     * servlet container ( catalina connector, etc ), and values in 9 - 16
+     * for connector use.
+     * <p>
+     * 17-31 range is not allocated or used.
      */
     public final void setNote(int pos, Object value) {
         notes[pos] = value;
@@ -494,14 +493,14 @@ public final class Request {
 
 
     public void recycle() {
-        bytesRead=0;
+        bytesRead = 0;
 
         contentLength = -1;
         contentTypeMB = null;
         charEncoding = null;
         headers.recycle();
         serverNameMB.recycle();
-        serverPort=-1;
+        serverPort = -1;
         localNameMB.recycle();
         localPort = -1;
         remotePort = -1;
@@ -511,7 +510,7 @@ public final class Request {
         parameters.recycle();
 
         unparsedURIMB.recycle();
-        uriMB.recycle(); 
+        uriMB.recycle();
         decodedUriMB.recycle();
         queryMB.recycle();
         methodMB.recycle();
@@ -542,6 +541,6 @@ public final class Request {
     }
 
     public boolean isProcessing() {
-        return reqProcessorMX.getStage()==org.apache.coyote.Constants.STAGE_SERVICE;
+        return reqProcessorMX.getStage() == org.apache.coyote.Constants.STAGE_SERVICE;
     }
 }

@@ -769,6 +769,8 @@ public class StandardHost extends ContainerBase implements Host {
     @Override
     protected synchronized void startInternal() throws LifecycleException {
 
+        System.out.println("standardHost.startInternal 线程:{" + Thread.currentThread().getName() + "}");
+
         // Set error report valve
         String errorValve = getErrorReportValveClass();
         if ((errorValve != null) && (!errorValve.equals(""))) {

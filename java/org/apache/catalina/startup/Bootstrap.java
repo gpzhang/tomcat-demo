@@ -63,6 +63,7 @@ public final class Bootstrap {
 
     /**
      * Daemon reference.
+     * 赋值为Catalina对象
      */
     private Object catalinaDaemon = null;
 
@@ -82,7 +83,9 @@ public final class Bootstrap {
                 // no config file, default to this loader - we might be in a 'single' env.
                 commonLoader = this.getClass().getClassLoader();
             }
+            //默认父类加载器commonLoader
             catalinaLoader = createClassLoader("server", commonLoader);
+            //默认父类加载器commonLoader
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
             handleThrowable(t);
@@ -95,6 +98,12 @@ public final class Bootstrap {
     private ClassLoader createClassLoader(String name, ClassLoader parent)
             throws Exception {
 
+        /**
+         * 查找配置文件/conf/catalina.properties的的server.loader和share.loader配置项
+         * 如果配置了则创建相应的类加载器CatalinaClassLoader和SharedClassLoader的实例,
+         * 否则默认使用父类加载器CommonClassLoader,
+         * 然而默认配置项为空
+         */
         String value = CatalinaProperties.getProperty(name + ".loader");
         if ((value == null) || (value.equals("")))
             return parent;
@@ -103,6 +112,9 @@ public final class Bootstrap {
 
         List<Repository> repositories = new ArrayList<Repository>();
 
+        /**
+         * str - 要解析的字符串,delim - 分隔符.
+         */
         StringTokenizer tokenizer = new StringTokenizer(value, ",");
         while (tokenizer.hasMoreElements()) {
             String repository = tokenizer.nextToken().trim();
@@ -199,8 +211,9 @@ public final class Bootstrap {
         // Load our startup class and call its process() method
         if (log.isDebugEnabled())
             log.debug("Loading startup class");
-        //通过反射实例化Catalina对象
+        //调用类加载实例commonLoader的 loadClass() 方法加载Catalina类文件
         Class<?> startupClass = catalinaLoader.loadClass("org.apache.catalina.startup.Catalina");
+        //通过反射实例化Catalina对象
         Object startupInstance = startupClass.newInstance();
 
         // Set the shared extensions class loader
@@ -226,8 +239,7 @@ public final class Bootstrap {
     /**
      * Load daemon.
      */
-    private void load(String[] arguments)
-            throws Exception {
+    private void load(String[] arguments) throws Exception {
 
         // Call the load() method
         String methodName = "load";
@@ -249,6 +261,9 @@ public final class Bootstrap {
         Method method = catalinaDaemon.getClass().getMethod(methodName, paramTypes);
         if (log.isDebugEnabled())
             log.debug("Calling startup class " + method);
+        /**
+         * 反射调用Catalina对象的load(String args[])方法
+         */
         method.invoke(catalinaDaemon, param);
 
     }
@@ -260,8 +275,7 @@ public final class Bootstrap {
     private Object getServer() throws Exception {
 
         String methodName = "getServer";
-        Method method =
-                catalinaDaemon.getClass().getMethod(methodName);
+        Method method = catalinaDaemon.getClass().getMethod(methodName);
         return method.invoke(catalinaDaemon);
 
     }
@@ -285,10 +299,12 @@ public final class Bootstrap {
     /**
      * Start the Catalina daemon.
      */
-    public void start()
-            throws Exception {
+    public void start() throws Exception {
         if (catalinaDaemon == null) init();
 
+        /**
+         * 反射调用Catalina对象的start方法
+         */
         Method method = catalinaDaemon.getClass().getMethod("start", (Class[]) null);
         method.invoke(catalinaDaemon, (Object[]) null);
 
@@ -298,8 +314,7 @@ public final class Bootstrap {
     /**
      * Stop the Catalina Daemon.
      */
-    public void stop()
-            throws Exception {
+    public void stop() throws Exception {
 
         Method method = catalinaDaemon.getClass().getMethod("stop", (Class[]) null);
         method.invoke(catalinaDaemon, (Object[]) null);
@@ -310,11 +325,9 @@ public final class Bootstrap {
     /**
      * Stop the standalone server.
      */
-    public void stopServer()
-            throws Exception {
+    public void stopServer() throws Exception {
 
-        Method method =
-                catalinaDaemon.getClass().getMethod("stopServer", (Class[]) null);
+        Method method = catalinaDaemon.getClass().getMethod("stopServer", (Class[]) null);
         method.invoke(catalinaDaemon, (Object[]) null);
 
     }
@@ -323,8 +336,7 @@ public final class Bootstrap {
     /**
      * Stop the standalone server.
      */
-    public void stopServer(String[] arguments)
-            throws Exception {
+    public void stopServer(String[] arguments) throws Exception {
 
         Object param[];
         Class<?> paramTypes[];
@@ -337,8 +349,7 @@ public final class Bootstrap {
             param = new Object[1];
             param[0] = arguments;
         }
-        Method method =
-                catalinaDaemon.getClass().getMethod("stopServer", paramTypes);
+        Method method = catalinaDaemon.getClass().getMethod("stopServer", paramTypes);
         method.invoke(catalinaDaemon, param);
 
     }
@@ -347,25 +358,21 @@ public final class Bootstrap {
     /**
      * Set flag.
      */
-    public void setAwait(boolean await)
-            throws Exception {
+    public void setAwait(boolean await) throws Exception {
 
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Boolean.TYPE;
         Object paramValues[] = new Object[1];
         paramValues[0] = Boolean.valueOf(await);
-        Method method =
-                catalinaDaemon.getClass().getMethod("setAwait", paramTypes);
+        Method method = catalinaDaemon.getClass().getMethod("setAwait", paramTypes);
         method.invoke(catalinaDaemon, paramValues);
 
     }
 
-    public boolean getAwait()
-            throws Exception {
+    public boolean getAwait() throws Exception {
         Class<?> paramTypes[] = new Class[0];
         Object paramValues[] = new Object[0];
-        Method method =
-                catalinaDaemon.getClass().getMethod("getAwait", paramTypes);
+        Method method = catalinaDaemon.getClass().getMethod("getAwait", paramTypes);
         Boolean b = (Boolean) method.invoke(catalinaDaemon, paramValues);
         return b.booleanValue();
     }
@@ -388,7 +395,6 @@ public final class Bootstrap {
      * @param args Command line arguments to be processed
      */
     public static void main(String args[]) {
-
         if (daemon == null) {
             // Don't set daemon until init() has completed
             Bootstrap bootstrap = new Bootstrap();
@@ -442,8 +448,7 @@ public final class Bootstrap {
             }
         } catch (Throwable t) {
             // Unwrap the Exception for clearer error reporting
-            if (t instanceof InvocationTargetException &&
-                    t.getCause() != null) {
+            if (t instanceof InvocationTargetException && t.getCause() != null) {
                 t = t.getCause();
             }
             handleThrowable(t);
@@ -505,8 +510,7 @@ public final class Bootstrap {
      * Get the value of the catalina.home environment variable.
      */
     public static String getCatalinaHome() {
-        return System.getProperty(Globals.CATALINA_HOME_PROP,
-                System.getProperty("user.dir"));
+        return System.getProperty(Globals.CATALINA_HOME_PROP, System.getProperty("user.dir"));
     }
 
 

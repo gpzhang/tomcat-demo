@@ -79,12 +79,19 @@ public class StandardPipeline extends LifecycleBase implements Pipeline, Contain
 
     /**
      * The basic Valve (if any) associated with this Pipeline.
+     * <p>
+     * Tomcat 会在Container组件创建时标准管道对象时制定默认的基础阀门
+     * StandardEngineValve,
+     * StandardHostValve,
+     * StandardContextValve,
+     * StandardWrapperValve
      */
     protected Valve basic = null;
 
 
     /**
      * The Container with which this Pipeline is associated.
+     * 对应Container组件的对象
      */
     protected Container container = null;
 
