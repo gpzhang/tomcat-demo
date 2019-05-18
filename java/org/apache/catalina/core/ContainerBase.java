@@ -1244,6 +1244,12 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
         if (pipeline instanceof Lifecycle) {
             ((Lifecycle) pipeline).start();
         }
+        /**
+         * tomcat启动时，调用在StandardEngine的start方法，
+         * 代码执行到setState(LifecycleState.STARTING);
+         * 通知EngineConfig生命周期监听器
+         * 触发了STARTING事件，调用了EngineConfig事件内部的start()逻辑（）
+         */
 
         /**
          * tomcat启动时，调用在StandardHost的start方法，
@@ -1575,13 +1581,13 @@ public abstract class ContainerBase extends LifecycleMBeanBase implements Contai
     /**
      * Start the background thread that will periodically check for
      * session timeouts.
-     * StandardEngine、StandardHost StandardContext都会调用super.startInternal()方法，
+     * StandardEngine、StandardHost、StandardContext、StandardWrapper都会调用super.startInternal()方法，
      * 按默认配置，后台理应没有后台线程，实际只有一个
      * 因为StandardEngine创建对象时，构造函数将父类的 backgroundProcessorDelay 的值由默认值-1修改为10,
-     * 所以执行逻辑会走到线程开启的逻辑
+     * 所以执行逻辑会走到线程开启的逻辑，其他组件对象创建时使用默认值backgroundProcessorDelay=-1
      */
     protected void threadStart() {
-        System.out.println("当前类对象:{ " + this + " }");
+        System.out.println("当前类对象:{ " + this + " }, backgroundProcessorDelay:" + backgroundProcessorDelay);
         if (thread != null)
             return;
         if (backgroundProcessorDelay <= 0)

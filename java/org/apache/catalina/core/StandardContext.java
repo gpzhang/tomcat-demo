@@ -206,8 +206,7 @@ public class StandardContext extends ContainerBase implements Context, Notificat
     /**
      * The set of application parameters defined for this application.
      */
-    private ApplicationParameter applicationParameters[] =
-            new ApplicationParameter[0];
+    private ApplicationParameter applicationParameters[] = new ApplicationParameter[0];
 
     private final Object applicationParametersLock = new Object();
 
